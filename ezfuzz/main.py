@@ -87,6 +87,7 @@ class Ezfuzz:
 						soc.send("Test\r\n")
 						soc.recv(self._receive_bytes)
 						soc.send(self._buffer)
+						soc.close()
 				except:
 					print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
 					self._num_bytes_crash -= 50
