@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
-
 try:
 	import subprocess as sp
 	import sockets
+	import exceptions
 except ImportError as err:
 	print(f"Import Error: {err}")
   
@@ -67,9 +66,9 @@ class Ezfuzz:
 		"""
 		try:
 			if not isinstance(targ_IP, str):
-				raise TypeError(r + "The target IP address must be a string." + rst)
+				raise InvalidTargetIPError(r + "The target IP address must be a string." + rst)
 			if not isinstance(targ_port, int):
-				raise TypeError(r + "The target port number must be an integer between 1-65535" + rst)
+				raise InvalidTargetPortError(r + "The target port number must be an integer between 1-65535" + rst)
 		except TypeError as err:
 			print(f"Error: {err}")
 
