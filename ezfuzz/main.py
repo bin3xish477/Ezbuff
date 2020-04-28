@@ -6,8 +6,9 @@ try:
 except ImportError as err:
 	print(f"Import Error: {err}")
  
-#--------------------Logging Config
-FORMAT = "%(levelname)s:%(asctime)s - %(message)s - %(funcName)s - %(process)d"
+#--------------------Logging Configurations
+logger = logging.getLogger(__name__)
+FORMAT = "%(levelname)s:%(asctime)s - %(funcName)s - %(process)d - %(message)s"
 logging.basicConfig(filename='ezfuzz.log',
 					level=DEBUG,
 					format=FORMAT)
