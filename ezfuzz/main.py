@@ -32,9 +32,22 @@ chars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x
 
 #-------------------Ezfuzz
 class Ezfuzz:
-	"""
-	"""
+	""" Ezfuzz class definition """
+
 	def __init__(self):
+		"""Initialize variables
+
+		Args:
+			_targ_IP (str): Will store the IP of the target machine, default = None
+			_targ_port (int): Will store the port number of the target application, default = None
+			_bad_chars_found (list): Will store the bad character found by the user, default = empty list
+			_nop_sled (str): A string of 16 no operation bytes.
+			_offset (int): Will store the integer returned by msf's pattern_offset file
+							that determines where the offset occured in the fuzzing process.
+			_num_bytes_crash (int): The number of bytes it took to crash the system.
+									Note: the bytes are sent in increments of 50.
+			_receive_bytes (int): The number of bytes will receive from the target machine at once.
+		"""
 		self._targ_IP = None
 		self._targ_port = None
 		self._bad_chars_found = []
@@ -43,45 +56,50 @@ class Ezfuzz:
 		self._num_bytes_crash = None
 		self._receive_bytes = 1024
 
+
 	@property
 	def bad_chars(self):
 		"""The bad characters found by user."""
 		return self._bad_chars_found
 	
+
 	@property
 	def num_bytes_crash(self)
 		""""""
 		return self._num_bytes_crash
 	
+
 	@num_bytes_crash.setter
 	def num_bytes_crash(self, new_bytes_value):
 		self._num_bytes_crash = new_bytes_value
 		
+
 	@property
 	def offset(self):
 		""""""
 		return self._offset
+
 
 	@offset.setter
 	def offset(self, arg):
 		""""""
 		self._offset = arg
 
+
 	def fuzz(self, targ_IP, targ_port):
 		"""Sends an incrementing number of bytes to an application
 		until it crashes or returns an error and then prints out the
 		number of bytes at the moment of the crash/error.
 
-		Params
-		------
+		Args:
 		targ_IP (str): The target's IP address.
 		targ_port (int): The target's port number.
 		"""
 		try:
 			if not isinstance(targ_IP, str):
-				raise InvalidTargetIPError(r + "The target IP address must be a string." + rst)
+				raise exceptions.InvalidTargetIPError(r + "The target IP address must be a string." + rst)
 			if not isinstance(targ_port, int):
-				raise InvalidTargetPortError(r + "The target port number must be an integer between 1-65535" + rst)
+				raise exceptions.InvalidTargetPortError(r + "The target port number must be an integer between 1-65535" + rst)
 		except TypeError as err:
 			logging.error(err)
 
@@ -106,23 +124,29 @@ class Ezfuzz:
 				finally:
 					self._num_bytes_crash += 50
 	
+
 	def send_msf_pattern(self):
 		""""""
 		pass
-	
+
+
 	def _generate_msf_pattern(self):
 		""""""
 		output = sp.run(['/usr/share/metasploit-framework/tools/pattern_create.rb', self._num_bytes_crash])
+		return output.stdout
 		
+
 	def test_offset(self):
 		""""""
 		with s.socket(s.AF_INET, s.SOCK_STREAM) as soc:
 			payload = 
 		
+
 	def send_bad_chars(self):
 		""""""
 		pass
 		
+
 	def _store_bad_chars(self):
 		""""""
 		pass
