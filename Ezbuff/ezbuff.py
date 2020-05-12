@@ -42,8 +42,8 @@ class InvalidMemoryAddressError(ValueError):
 		super.__init__(error_msg)
 
 
-class NoOffsetError(ValueError):
-	"""Raised if offset property has not been set"""
+class NoOffsetError(AttributeError):
+	"""Will be raised if offset property has not been set"""
 	def __init__(self, error_msg):
 		super.__init__(error_msg)
 
