@@ -1,6 +1,6 @@
 import setuptools
 
-setuptools.setup(name='ezfuzz',
+setuptools.setup(name='ezbuff',
       version='1.0',
       description='Ezbuff is a Python package created to make OSCP buffer overflow easier.',
       url='https://github.com/binexisHATT/Ezfuzz',
