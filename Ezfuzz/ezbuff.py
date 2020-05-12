@@ -33,14 +33,19 @@ class InvalidTargetPortError(TypeError):
 		super.__init__(error_msg)
 
 
+class InvalidMemoryAddressError(ValueError):
+	"""Will be raised if value passed into the `jump_eip`
+	"""
+
+
 class NoOffsetError(ValueError):
 	"""Raised if offset property has not been set"""
 	def __init__(self, error_msg):
 		super.__init__(error_msg)
 
 
-#-------------------Ezfuzz
-class Ezfuzz:
+#-------------------Ezbuff
+class Ezbuff:
 	""" Ezfuzz class definition
 
 	Attributes:
@@ -56,11 +61,11 @@ class Ezfuzz:
 "\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
 
 
-	def __init__(self, targ_IP, targ_port):
+	def __init__(self, targ_ip, targ_port):
 		"""Initialize variables
 
 		Args:
-			_targ_IP (str): Will store the IP of the target machine, default = None
+			_targ_ip (str): Will store the IP of the target machine, default = None
 			_targ_port (int): Will store the port number of the target application, default = None
 			_bad_chars_found (list): Will store the bad character found by the user, default = empty list
 			_nop_sled (str): A string of 16 no operation bytes.
@@ -75,11 +80,11 @@ class Ezfuzz:
 			exceptions.InvalidTargetPortError if invalid port number is passed as an argument.
 		"""
 		try:
-			if not isinstance(targ_IP, str):
+			if not isinstance(targ_ip, str):
 				raise exceptions.InvalidTargetIPError(r+"The target IP address must be a string."+rst)
-			if not search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", targ_IP):
+			if not search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", targ_ip):
 				raise exceptions.InvalidTargetIPError(r+"The target IP address is not a valid IP address."+rst)
-			self._targ_IP = targ_IP
+			self._targ_ip = targ_ip
 			if not isinstance(targ_port, int):
 				raise exceptions.InvalidTargetPortError(r+"The target port number must be an integer between 1-65535"+rst)
 			self._targ_port = targ_port
@@ -95,25 +100,25 @@ class Ezfuzz:
 
 
 	def __repr__(self):
-		return (f"Ezfuzz(targ_IP='{self.targ_IP}',targ_port={self.targ_port},"
+		return (f"Ezfuzz(targ_ip='{self.targ_ip}',targ_port={self.targ_port},"
 				f"nop_sled={self._nop_sled},bad_characters={self._bad_chars_found},"
 				f"offset={self._offset},num_bytes_crash={self._num_bytes_crash})")
 
 
 	def __str__(self):
-		return f"Ezfuzz(target_IP_address='{self.targ_IP}', target_port={self.targ_port})"
+		return f"Ezfuzz(target_ip_address='{self.targ_ip}', target_port={self.targ_port})"
 
 
 	@property
-	def targ_IP(self):
+	def targ_ip(self):
 		"""Returns the current target's IP address"""
-		return self._targ_IP
+		return self._targ_ip
 
 
-	@targ_IP.setter
-	def targ_IP(self, new_IP):
+	@targ_ip.setter
+	def targ_ip(self, new_IP):
 		"""Sets a new IP addresses"""
-		self._targ_IP = new_IP
+		self._targ_ip = new_IP
 
 	@property
 	def targ_port(self):
@@ -179,21 +184,21 @@ class Ezfuzz:
 
 
 	@property
-	def jump_EIP(self):
+	def jump_eip(self):
 		"""
 		"""
-		return self._jump_EIP
+		return self._jump_eip
 
 
 	@jump_EIP.setter
-	def jump_EIP(self, jump_cmd_mem_location):
+	def jump_eip(self, jump_mem_location):
 		"""
 
 		Args:
-			jump_cmd_mem_location (str): The memory address that will be used to jump the EIP obtained
-										to execute our payload. Example = "\x8f\x35\x4a\x5f"
+			jump_mem_location (str): The memory address that will be used to jump the EIP obtained
+										to execute our payload. Example = \x8f\x35\x4a\x5f
 		"""
-		self.jump_EIP = jump_cmd_mem_location
+		self.jump_eip = jump_mem_location
 
 
 	def fuzz(self):
@@ -202,7 +207,7 @@ class Ezfuzz:
 		number of bytes at the moment of the crash/error.
 
 		Args:
-		targ_IP (str): The target's IP address.
+		targ_ip (str): The target's IP address.
 		targ_port (int): The target's port number.
 		"""
 
@@ -250,13 +255,13 @@ class Ezfuzz:
 		return output.stdout
 		
 
-	def get_offset(self, EIP_characters):
+	def get_offset(self, eip_chars):
 		"""
 
 		Args:
-			EIP_characters (str): The address that overwrote the EIP when program crashed
+			eip_chars (str): The address that overwrote the EIP when program crashed
 		"""
-		output = sp.run(['usr/share/metasploit-framework/tools/pattern_offset.rb'], EIP_characters)
+		output = sp.run(['usr/share/metasploit-framework/tools/pattern_offset.rb'], eip_chars)
 		self.offset(output.stdout)
 
 
@@ -279,14 +284,16 @@ class Ezfuzz:
 	def send_bad_chars(self):
 		""""""
 		# use chars.replace to remove bad characters discovered by user.
-			
+		soc = self._create_socket()
+		with soc:
+			soc.send(Ezbuff.)
 
 	def _create_socket(self):
 		"""
 		"""
 		try:
 			soc = s.socket(s.AF_INET, s.SOCK_STREAM)
-			soc.connect((self._targ_IP, self._targ_port))
+			soc.connect((self._targ_ip, self._targ_port))
 		except OSError as err:
 			print(r+"OSError: {err}"+rst)
 		return soc

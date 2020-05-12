@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from Ezfuzz import ezfuzz
+from Ezfuzz import ezbuff
 from sys import argv
 
 

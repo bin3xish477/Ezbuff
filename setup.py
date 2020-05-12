@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(name='ezfuzz',
       version='1.0',
-      description='Ezfuzz is a Python package created to make fuzzing an application easier.',
+      description='Ezbuff is a Python package created to make OSCP buffer overflow easier.',
       url='https://github.com/binexisHATT/Ezfuzz',
       author='Alexis Rodriguez',
       author_email='rodriguez10011999@gmail.com',
