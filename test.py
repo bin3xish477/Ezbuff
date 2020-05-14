@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 
-from Ezbuff import ezbuff
+from Ezbuff.ezbuff import Ezbuff
 from sys import argv
 
 
 def main():
-	test = ezbuff.Ezbuff("192.168.13.234", 80)
+	test = Ezbuff("192.168.13.234", 80)
 
 	print(repr(test))
 	print(str(test))
