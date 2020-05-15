@@ -14,7 +14,7 @@ def main():
 	test.jump_eip = r"\x8f\x35\x4a\x5f"
 	test.add_bad_char(r"\xaa")
 
-	print("Bad characters collected:", test.bad_chars, "Current jump eip memory address:", test.jump_eip)
+	print(test.bad_chars, test.jump_eip)
 
 	print(repr(test))
 

