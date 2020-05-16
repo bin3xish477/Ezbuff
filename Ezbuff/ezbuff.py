@@ -19,7 +19,6 @@ b = "\033[94m"
 p = "\033[95"
 
 
-"""Custom error classes created for Ezfuzz"""
 class InvalidTargetIPError(TypeError):
 	"""Will be raised if the type of the target IP
 	is not of type "str"
