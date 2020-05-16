@@ -7,7 +7,7 @@ setuptools.setup(name='ezbuff',
       author='Alexis Rodriguez',
       author_email='rodriguez10011999@gmail.com',
       license='MIT',
-      packages=setuptools.find_package(),
+      packages=setuptools.find_packages(),
       classifiers=[
           "Programming Language :: Python :: 3",
           "License :: OSI Approved :: MIT License",

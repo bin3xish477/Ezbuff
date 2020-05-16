@@ -8,11 +8,17 @@ from sys import argv
 def main():
 	test = Ezbuff("192.168.230.10", 80)
 
-	test.offset = 1200
+	test.num_bytes_crash = 1200
 
-	test.add_bad_char(r'\x00')
+	test.offset = 800
 
-	test.send_bad_chars()
+	# test.fuzz_interval_seconds = 2
+
+	test.add_bad_char('\x00', '\x01', '\x02')
+
+	test.fuzz()
+
+	# print(repr(test))
 
 
 if __name__ == '__main__':
