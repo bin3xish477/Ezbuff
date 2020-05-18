@@ -1,4 +1,4 @@
-"""Defines the `Overflow` classes which contains most
+"""Defines the `Overflow` class which contains most
 of the functions needed to perform the buffer overflow.
 
 Name: ezbuff.py
