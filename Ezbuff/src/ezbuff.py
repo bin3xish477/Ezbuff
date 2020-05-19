@@ -2,13 +2,6 @@
 of the functions needed to perform the buffer overflow.
 
 Name: ezbuff.py
-
-Raises:
-	InvalidTargetIPError
-	InvalidTargetPortError
-	InvalidMemoryAddressError
-	TypeError
-	NoOffsetError
 """
 
 
@@ -113,7 +106,6 @@ class Overflow:
 				raise InvalidTargetIPError("The target IP address must be a string.")
 			if not search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", targ_ip):
 				raise InvalidTargetIPError("The target IP address is not a valid IP address.")
-			self._targ_ip = targ_ip
 			if not isinstance(targ_port, int):
 				raise InvalidTargetPortError("The target port number must be an integer between 1-65535")
 		except InvalidTargetIPError as err:
@@ -201,8 +193,8 @@ class Overflow:
 	
 	
 	@property
-	def bad_chars(self) -> str:
-		"""Return the bad characters set by user."""
+	def bad_chars(self) -> list:
+		"""Return the bad characters set by user"""
 		if not len(self._bad_chars):
 			return None
 		return self._bad_chars
@@ -275,9 +267,8 @@ class Overflow:
 		
 
 	@property
-	def offset(self):
-		"""
-		"""
+	def offset(self) -> int:
+		"""Returns the instance offset value"""
 		return self._offset
 
 
@@ -301,7 +292,7 @@ class Overflow:
 
 
 	@property
-	def jump_eip(self):
+	def jump_eip(self) -> str:
 		"""Returns the memory address variable,`jump_eip`, 
 		containing the jump eip instruction"""
 		return self._jump_eip
