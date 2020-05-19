@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(name='ezbuff',
       version='1.0',
-      description='Ezbuff is a Python package created to make OSCP buffer overflow easier.',
+      description='Ezbuff is a Python package created to make the 2020 PWK buffer overflow easier to perform.',
       url='https://github.com/binexisHATT/Ezfuzz',
       author='Alexis Rodriguez',
       author_email='rodriguez10011999@gmail.com',
