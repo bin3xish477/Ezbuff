@@ -1,7 +1,7 @@
 """Defines the `Overflow` class which contains most
 of the functions needed to perform the buffer overflow.
 
-Name: ezbuff.py
+Name: overflow.py
 """
 
 
@@ -12,8 +12,8 @@ try:
 	from re import search
 	from time import sleep
 	from sys import exit
-	from Ezbuff.src.pattern_create import pattern_create
-	from Ezbuff.src.pattern_offset import pattern_offset
+	from ezbuff.src.pattern_create import pattern_create
+	from ezbuff.src.pattern_offset import pattern_offset
 except ImportError as err:
 	print(f"Import Error: {err}")
 

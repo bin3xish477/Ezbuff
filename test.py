@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from Ezbuff.src.ezbuff import Overflow
+from ezbuff.src.overflow import Overflow
 
 
 def main():
