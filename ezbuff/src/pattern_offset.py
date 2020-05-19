@@ -5,6 +5,7 @@ in the `pattern_create` file.
 Name: pattern_offset.py
 """
 
+from binascii import unhexlify
 
 class PatternOffsetError(Exception):
     """Will handle any exceptions raised while attempting to
@@ -27,6 +28,14 @@ def pattern_offset(eip_value, pattern):
     Raises:
         PatternOffsetError: 
     """
-    offset = None
+    bytes_obj = bytes.fromhex(eip_value)
+    ascii_str = bytes_obj.decode("ASCII")[::-1]
+    offset = pattern.find(ascii_str)
+    try:
+        if offset == -1:
+            raise PatternOffsetError(f"The string {eip_value[::-1]} could not be found within the genenrated pattern")
+    except PatternOffsetError as err:
+        print(f"PatternOffsetError: {err}")
+    else:
+        return offset
 
-    return offset

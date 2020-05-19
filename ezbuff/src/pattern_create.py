@@ -5,6 +5,7 @@ after crashing the application to determine the offset value.
 Name: pattern_create.py
 """
 
+from sys import exit
 
 class MaximumPatternLengthError(Exception):
     """Will handle any errors throughout the pattern generation
@@ -25,10 +26,16 @@ def pattern_create(length):
         PatternCreateError:
     """
     try:
+        if not length:
+            raise TypeError("The `num_bytes_crash` variable must be set before sending a pattern payload!")
         if length > 20280:
             raise MaximumPatternLengthError("The length of the pattern cannot exceed 20280 characters")
+    except TypeError as err:
+        print(f"TypeError: {err}")
+        exit(1)
     except MaximumPatternLengthError as err:
         print(f"MaximumPatternLengthError: {err}")
+        exit(1)
 
     UPPERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     LOWERS = "abcdefghijklmnopqrstuvwxyz"

