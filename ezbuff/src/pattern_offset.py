@@ -33,7 +33,7 @@ def pattern_offset(eip_value, pattern):
     offset = pattern.find(ascii_str)
     try:
         if offset == -1:
-            raise PatternOffsetError(f"The string {eip_value[::-1]} could not be found within the genenrated pattern")
+            raise PatternOffsetError(f"The string '{ascii_str}' could not be found within the genenrated pattern")
     except PatternOffsetError as err:
         print(f"PatternOffsetError: {err}")
     else:
