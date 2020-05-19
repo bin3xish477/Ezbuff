@@ -3,7 +3,7 @@ Ezbuff is a Python package created to make the **2020 PWK buffer overflow** easi
 
 ## Installation
 ```python
-pip install ezbuff
+pip3 install ezbuff
 ```
 
 ## Usage
