@@ -51,7 +51,6 @@ def main():
 	# Sending pattern to determine offset
 	test.send_pattern()
 
-
 if __name__ == '__main__':
 	main()
 ```
