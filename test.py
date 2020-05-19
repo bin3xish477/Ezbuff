@@ -48,6 +48,8 @@ def main():
 	# Print user object representation
 	print(test)
 
+	test.send_pattern()
+
 
 if __name__ == '__main__':
 	main()

