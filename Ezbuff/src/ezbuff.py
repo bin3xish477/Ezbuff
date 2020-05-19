@@ -18,7 +18,7 @@ except ImportError as err:
 	print(f"Import Error: {err}")
 
 
-#-------------------Ansicolors
+# -------------------( Ansicolors )-------------------
 rst = "\033[0m"
 bld = "\033[01m"
 rd = "\033[91m"
@@ -28,6 +28,7 @@ be = "\033[94m"
 pe = "\033[95"
 
 
+# -------------------( Custom Exceptions )-------------------
 class InvalidTargetIPError(TypeError):
 	"""Will be raised if the type of the target IP
 	is not of type "str"
@@ -59,7 +60,7 @@ class NoOffsetError(AttributeError):
 		super().__init__(error_msg)
 
 
-#-------------------Overflow
+# -------------------( Class Overflow Definition )-------------------
 class Overflow:
 	""" Overflow class definition
 
