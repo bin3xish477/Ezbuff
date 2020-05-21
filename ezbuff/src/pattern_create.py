@@ -3,6 +3,13 @@ which will be used to generate a specific set of characters to send
 after crashing the application to determine the offset value.
 
 Name: pattern_create.py
+
+███████╗███████╗██████╗ ██╗   ██╗███████╗███████╗
+██╔════╝╚══███╔╝██╔══██╗██║   ██║██╔════╝██╔════╝
+█████╗    ███╔╝ ██████╔╝██║   ██║█████╗  █████╗  
+██╔══╝   ███╔╝  ██╔══██╗██║   ██║██╔══╝  ██╔══╝  
+███████╗███████╗██████╔╝╚██████╔╝██║     ██║     
+╚══════╝╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝
 """
 
 from sys import exit
