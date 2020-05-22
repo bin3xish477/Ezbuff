@@ -12,15 +12,12 @@ Name: pattern_offset.py
 ╚══════╝╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝
 """
 
-from binascii import unhexlify
-
 class PatternOffsetError(Exception):
     """Will handle any exceptions raised while attempting to
     find offset value
     """
     def __init__(self, error_msg):
         super().__init__(error_msg)
-
 
 def pattern_offset(eip_value, pattern):
     """This function will generate a specific pattern of characters
@@ -38,6 +35,7 @@ def pattern_offset(eip_value, pattern):
     bytes_obj = bytes.fromhex(eip_value)
     ascii_str = bytes_obj.decode("ASCII")[::-1]
     offset = pattern.find(ascii_str)
+    
     try:
         if offset == -1:
             raise PatternOffsetError(f"The string '{ascii_str}' could not be found within the genenrated pattern")

