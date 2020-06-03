@@ -1,14 +1,16 @@
 import setuptools
+from os import path
 
-with open("README.md", "r") as f:
+directory = path.abspath(path.dirname(__file__))
+with open(path.join(directory, 'README.md'), 'r') as f:
     long_description = f.read()
 
 setuptools.setup(
       name='ezbuff',
       version='1.0',
-      description='Ezbuff is a Python package created to make the 2020 PWK buffer overflow easier to perform.',
+      description='Ezbuff is a Python package created to automate some steps of the 2020 PWK buffer overflow.',
       long_description=long_description,
-      long_description_content_type="text/markdown",
+      long_description_content_type='text/markdown',
       url='https://github.com/binexisHATT/Ezfuzz',
       author='Alexis Rodriguez',
       author_email='rodriguez10011999@gmail.com',

