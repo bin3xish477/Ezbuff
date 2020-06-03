@@ -47,7 +47,7 @@ def main():
 	obj.send_pattern()
 
 	# Get offset 
-	# offset = obj.get_offset("30416B30")
+	offset = obj.get_offset("30416B30")
 	print(offset)
 
 	# Set offset value after retrieving from function above
