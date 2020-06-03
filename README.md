@@ -64,7 +64,7 @@ def main():
 	#	  as shown below
 	obj.add_bad_char("\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
 
-	# Send payload with all characters to find bad characters.
+	# Send payload with all characters to find bad characters
 	obj.send_bad_chars()
 
 	# Set the memory address to jump to after finding valid memory address
